@@ -6,10 +6,10 @@ from PyQt5.QtWidgets import QWidget, QLineEdit,QHBoxLayout
 class levenshtein_sort_proxy_model(QSortFilterProxyModel):
     
     def lessThan(
-        self, 
-        left_index, 
-        right_index
-        ):
+            self, 
+            left_index, 
+            right_index
+            ):
         left_data = self.sourceModel().data(left_index)
         right_data = self.sourceModel().data(right_index)
 
@@ -23,9 +23,9 @@ class levenshtein_sort_proxy_model(QSortFilterProxyModel):
 class s_file_search_bar(QWidget):
 
     def __init__(
-        self, 
-        parent=None
-        ):
+            self, 
+            parent=None
+            ):
         super(s_file_search_bar, self).__init__(parent)
         
         # Create a layout to hold the line edit and label
@@ -59,9 +59,9 @@ class s_file_search_bar(QWidget):
 
 
     def set_list_view(
-        self, 
-        list_view
-        ):
+            self, 
+            list_view
+            ):
         # Create an instance of the custom proxy model
         proxy_model = levenshtein_sort_proxy_model()
 

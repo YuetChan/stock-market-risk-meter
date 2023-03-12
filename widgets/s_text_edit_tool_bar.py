@@ -5,10 +5,10 @@ from PyQt5.QtGui import QFont, QTextCharFormat, QBrush, QTextListFormat, QIcon, 
 class s_text_edit_tool_bar(QToolBar):
 
     def __init__(
-        self,
-        text_edit_area, 
-        parent=None
-        ):
+            self,
+            text_edit_area, 
+            parent=None
+            ):
         super(s_text_edit_tool_bar, self).__init__(parent)
 
         self.text_edit_area = text_edit_area
@@ -32,7 +32,7 @@ class s_text_edit_tool_bar(QToolBar):
         self.init_underline_action()
 
         self.init_bullet_point_action()
-        self.init_code_block()
+        # self.init_code_block()
         
         self.init_left_align()
         self.init_center_align()
@@ -86,13 +86,13 @@ class s_text_edit_tool_bar(QToolBar):
         self.action_map['bullet_action'] = bullet_action
 
 
-    def init_code_block(self):
-        code_block_action = QAction('Code Block', self)
+    # def init_code_block(self):
+    #     code_block_action = QAction('Code Block', self)
         
-        code_block_action.triggered.connect(self.add_code_block)
-        code_block_action.setCheckable(True)
+    #     code_block_action.triggered.connect(self.add_code_block)
+    #     code_block_action.setCheckable(True)
 
-        self.addAction(code_block_action)
+    #     self.addAction(code_block_action)
 
 
     def init_left_align(self):
@@ -148,11 +148,13 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def set_text_style(
-        self, 
-        style, 
-        checked=True
-        ):
-        cursor = self.text_edit_area.textCursor()
+            self, 
+            style, 
+            checked=True
+            ):
+        text_edit_area = self.text_edit_area
+
+        cursor = text_edit_area.textCursor()
 
         char_format = cursor.charFormat()
         font = char_format.font()
@@ -168,13 +170,13 @@ class s_text_edit_tool_bar(QToolBar):
 
 
         char_format.setFont(font)
-        self.text_edit_area.setCurrentCharFormat(char_format)
+        text_edit_area.setCurrentCharFormat(char_format)
 
 
     def set_text_alignment(
-        self, 
-        alignment
-        ):
+            self, 
+            alignment
+            ):
         text_edit_area = self.text_edit_area
         action_map = self.action_map
 
@@ -199,7 +201,8 @@ class s_text_edit_tool_bar(QToolBar):
 
     def add_bullet_point(
             self, 
-            checked=True):
+            checked=True
+            ):
         cursor = self.text_edit_area.textCursor()
 
         if checked:
@@ -207,62 +210,45 @@ class s_text_edit_tool_bar(QToolBar):
             list_format = QTextListFormat()
             list_format.setStyle(QTextListFormat.ListDisc)
 
+            if len(cursor.block().text()) == 0:
+                cursor.movePosition(QTextCursor.StartOfBlock)
+                cursor.movePosition(QTextCursor.StartOfBlock)
+
+
             # insert the list format
             cursor.createList(list_format)
 
 
-    def add_code_block(self):
-        cursor = self.text_edit_area.textCursor()
+    # def add_code_block(self):
+    #     cursor = self.text_edit_area.textCursor()
 
-        # create a char format and set its text color to red
-        char_format = QTextCharFormat()
+    #     # create a char format and set its text color to red
+    #     char_format = QTextCharFormat()
 
-        char_format.setForeground(QColor("#D4D4D4"))
-        char_format.setFont(QFont("Courier", 10, QFont.Normal))
+    #     char_format.setForeground(QColor("#D4D4D4"))
+    #     char_format.setFont(QFont("Courier", 10, QFont.Normal))
 
-        cursor.mergeCharFormat(char_format)
+    #     cursor.mergeCharFormat(char_format)
 
-        # Create block format for code block
-        block_format = cursor.blockFormat()
-        block_format.setBackground(QColor("#2E2E2E"))
+    #     # Create block format for code block
+    #     block_format = cursor.blockFormat()
+    #     block_format.setBackground(QColor("#2E2E2E"))
         
-        block_format.setLeftMargin(15)
-        block_format.setRightMargin(10)
+    #     block_format.setLeftMargin(15)
+    #     block_format.setRightMargin(10)
 
-        # Apply block and char formats
-        cursor.mergeBlockFormat(block_format)
+    #     # Apply block and char formats
+    #     cursor.mergeBlockFormat(block_format)
         
-        cursor.select(QTextCursor.LineUnderCursor)
+    #     cursor.select(QTextCursor.LineUnderCursor)
 
-        # self.global_char_format = char_format
-        self.text_edit_area.setCurrentCharFormat(char_format)
-
-        # # Define keyword patterns and corresponding styles
-        # keyword_patterns = ["\\b" + keyword + "\\b" for keyword in ["if", "else", "while", "for", "return"]]
-        # keyword_format = QTextCharFormat()
-        # keyword_format.setForeground(QColor("#F92672"))
-        # keyword_format.setFontWeight(QFont.Bold)
-
-        # # Set highlighting rules
-        # self.highlighting_rules = [(QRegExp(pattern), keyword_format) for pattern in keyword_patterns]
-        # # Create char format for keyword style
-        # keyword_format = QTextCharFormat()
-
-        # keyword_format.setForeground(QColor("#007acc"))
-        # keyword_format.setFontWeight(QFont.Bold)
-
-        # # Add keyword patterns to syntax highlighter
-        # keyword_patterns = ["if", "else", "elif", "for", "while", "in", "not", "and", "or", "break", "continue", "return"]
-
-        # for pattern in keyword_patterns:
-        #     pattern_regex = QRegularExpression(r"\b" + pattern + r"\b")
-
-        #     self.text_edit_area.highlighter.add_highlight_rule(pattern_regex, keyword_format)
+    #     # self.global_char_format = char_format
+    #     self.text_edit_area.setCurrentCharFormat(char_format)
 
 
     def format_for(
-        self, 
-        style
-        ):
+            self, 
+            style
+            ):
         return self.text_edit_area.document().rootFrame().frameFormat().property(style)
 

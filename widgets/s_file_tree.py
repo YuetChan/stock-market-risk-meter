@@ -6,15 +6,15 @@ from PyQt5.QtGui import QStandardItemModel, QStandardItem
 class s_file_tree(QTreeView):
 
     def __init__(
-        self, 
-        id, 
-        label, 
-        root_dir, 
-        fpaths, 
-        hl_fpaths,
-        hl_decorator,
-        parent=None
-        ):
+            self, 
+            id, 
+            label, 
+            root_dir, 
+            fpaths, 
+            hl_fpaths,
+            hl_decorator,
+            parent=None
+            ):
         super(s_file_tree, self).__init__(parent)
 
         self.id = id
@@ -29,10 +29,10 @@ class s_file_tree(QTreeView):
 
 
     def populate(
-        self, 
-        root_dir,
-        label
-        ):
+            self, 
+            root_dir,
+            label
+            ):
         root_item = QStandardItem(root_dir)
 
         model = QStandardItemModel()
@@ -47,11 +47,11 @@ class s_file_tree(QTreeView):
 
     # Recursive impl
     def add_files(
-        self, 
-        parent, 
-        path,
-        model
-        ):
+            self, 
+            parent, 
+            path,
+            model
+            ):
         fpaths = self.fpaths
 
         # Loop through the items in the directory
@@ -91,6 +91,7 @@ class s_file_tree(QTreeView):
         ):
         if not parent:
             parent = self.invisibleRootItem()
+
 
         for i in range(parent.rowCount()):
             child = parent.child(i)

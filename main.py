@@ -1,72 +1,79 @@
-import argparse
-import cache_checker
-import cloc_proxy
+from config_reader import config_reader
+import core_helper
+import db_connector
+import fs_helper
 
-def main(args):
-    print(args.include_ext)
-    # print(args.include_dir)
-    # Initialize the database connection
-    # cache_checker.init("test.db")
+from PyQt5 import QtGui
 
-    # Call the functions from the cache_checker module
-    # cache_checker.caches_by_dir_n_commit(args.dir, args.commit)
-    # cache_checker.checks_if_cache_exits(args.dir, args.commit)
 
-    # cache_checker.close()
-    # cloc_proxy.count_loc()
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QColor, QBrush
 
+from widgets.s_file_tree import s_file_tree
+from widgets.s_file_list import s_file_list
+from widgets.s_main_window import s_main_window
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='My script description')
+    # db_connector.init('test.db')
+    # db_proxy.init_project('test_project_1')
     
-    parser.add_argument(
-        '--exclude-ext', 
-        nargs='+', 
-        metavar='<ext1> [,<ext2>[...]]', 
-        help='Do not count files having the given file name extensions.')
-    
-    parser.add_argument(
-        '--exclude-dir', 
-        nargs='+', 
-        metavar='<D1>[,D2[...]]', 
-        help='Exclude the given comma separated directories  D1, D2, D3, et cetera, from being scanned. For example --exclude-dir=.cache,test  will skip  all files and subdirectories that have /.cache/ or /test/ as their parent directory. Directories named .bzr, .cvs, .hg, .git, .svn, and .snapshot are always excluded. This option only works with individual directory names so including file path separators is not  allowed. Use --fullpath and --not-match-d=<regex> to supply a regex matching multiple subdirectories.')
+    # db_proxy.select_project_by_id("3412cf74-8d46-40c1-9f88-0e6a1ae7cbbc")
 
-    parser.add_argument(
-        '--no-match-d', 
-        nargs='+', 
-        metavar='<regex>', 
-        help='Count all files except those in directories matching the Perl regex. Only the trailing  directory name is compared, for example, when counting in /usr/local/lib, only \'lib\' is compared to the regex. Add --fullpath to compare parent directories to the regex. Do not include file path separators at the beginning or end of the regex.')
-    
-    parser.add_argument(
-        '--no-match-f', 
-        nargs='+', 
-        metavar='<regex>', 
-        help='Count all files except those whose basenames match the Perl regex.  Add --fullpath to include parent directories in the regex instead of just the basename.')
+    # db_proxy.add_note_by_file_path_n_projectid("note1", "./test", "3412cf74-8d46-40c1-9f88-0e6a1ae7cbbc")
 
-    parser.add_argument(
-        '--include-ext', 
-        nargs='+', 
-        metavar='<ext1> [,<ext2>[...]]', 
-        help='Count only languages having the given comma separated file extensions. Use --show-ext to see the recognized extensions.')
+    # db_proxy.update_note_by_file_path_n_projectid("note_1_c", "./test", "3412cf74-8d46-40c1-9f88-0e6a1ae7cbbc")
+    # db_proxy.select_notes_by_filepath_like_n_project_id("./test%", "3412cf74-8d46-40c1-9f88-0e6a1ae7cbbc")
     
-    parser.add_argument(
-        '--include-dir', 
-        nargs='+', 
-        metavar='<D1>[,D2,]', 
-        help='Include the given comma separated directories D1, D2, D3, et cetera')
-    
-    parser.add_argument(
-        '--match-d', 
-        nargs='+', 
-        metavar='<regex>', 
-        help='Only count files in directories matching the Perl regex.  For example  --match-d=\'/(src|include)/\'  only counts files in directories containing  /src/ or /include/.  Unlike --not-match-d,  --match-f, and --not-match-f, --match-d always compares the fully qualified path against the regex.')
-    
-    parser.add_argument(
-        '--match-f', 
-        nargs='+', 
-        metavar='<regex>', 
-        help='Count all files except those whose basenames match the Perl regex.  Add --fullpath to include parent directories in the regex instead of just  the basename.')
+    # db_connector.close()
 
+    # print(config_reader.get_all_filepaths())
 
-    args = parser.parse_args()
-    main(args)
+    creader = config_reader('s_config.json')
+
+    app = QApplication([])
+
+    all_fpaths = fs_helper.get_all_filepaths('./')
+    config_fpaths = creader.get_all_filepaths()
+
+    matched_result = fs_helper.find_matched_filepaths(all_fpaths, config_fpaths)
+
+    dangling_fpaths = matched_result['dangling_fpaths']
+
+    hl_fpaths = matched_result['matched_fpaths']
+    hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
+
+    tree_widget = s_file_tree(
+        'id', 
+        'project_1', 
+        './', 
+        all_fpaths, 
+        hl_fpaths,
+        hl_decorator)
+    
+    tree_widget.setMaximumWidth(300)
+    
+    list_model = QStandardItemModel()
+
+    item1 = QStandardItem("Item 1")
+    item2 = QStandardItem("Item 2")
+    item3 = QStandardItem("Item 3")
+
+    list_model.appendRow(item1)
+    list_model.appendRow(item2)
+    list_model.appendRow(item3)
+
+    list_view = s_file_list(list_model)
+
+    main_window = s_main_window(tree_widget, list_view)
+    
+    main_window.resize(1200, 900)
+    main_window.show()
+    # tree.decorate_item()
+    # print(tree.find_by_fname('.git'))
+    # tree.print_tree()
+
+    # print(tree.find_by_fname('.git'))
+    # tree.show()
+
+    app.exec_()
+    

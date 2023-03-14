@@ -1,13 +1,15 @@
 from bs4 import BeautifulSoup
 import hashlib
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QKeyEvent, QTextListFormat, QTextCursor, QKeySequence
 from PyQt5.QtWidgets import QTextEdit, QApplication
 
 from widgets.s_find_dialog import s_find_dialog
 
 class s_text_edit_area(QTextEdit):
+
+    text_changed = pyqtSignal(dict)
 
     def __init__(
             self, 
@@ -17,14 +19,27 @@ class s_text_edit_area(QTextEdit):
 
         self.qt_clipbrd_cache = { }
 
-        self.cursorPositionChanged.connect(self.on_cursor_position_changed)
-
+        self.cursorPositionChanged.connect(self._on_cursor_position_changed)
+        self.textChanged.connect(self._on_text_changed)
+        
 
     def set_tool_bar(
             self, 
             tool_bar
             ):
         self.tool_bar = tool_bar
+
+
+    def highlight_selection(
+            self, 
+            cursor, 
+            start_pos, 
+            end_pos
+            ):
+        cursor.setPosition(start_pos)
+        cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
+        
+        self.setTextCursor(cursor)
 
 
     def keyPressEvent(
@@ -37,20 +52,20 @@ class s_text_edit_area(QTextEdit):
 
         tool_bar = self.tool_bar
 
-        if self.is_delete_key(event):
-            if self.is_delete_on_empty_line(cursor) and self.is_list_above(cursor):
+        if self._is_delete_key(event):
+            if self._is_delete_on_empty_line(cursor) and self._is_list_above(cursor):
                 super().keyPressEvent(event)
 
-                self.create_empty_list(cursor)
+                self._create_empty_list(cursor)
                 tool_bar.toggle_bullet_pt(True) 
 
-            elif self.is_delete_on_empty_list(cursor):
+            elif self._is_delete_on_empty_list(cursor):
                 super().keyPressEvent(event)
 
-                was_in_bullet_pt = not self.is_list(cursor) and tool_bar.is_bullet_pt_checked()
+                was_in_bullet_pt = not self._is_list(cursor) and tool_bar.is_bullet_pt_checked()
 
                 if was_in_bullet_pt:
-                    self.reset_indent(cursor)
+                    self._reset_indent(cursor)
                     tool_bar.toggle_bullet_pt(False) 
 
 
@@ -58,7 +73,7 @@ class s_text_edit_area(QTextEdit):
                 super().keyPressEvent(event)
 
 
-        elif self.is_copy_key(event) or self.is_cut_key(event):
+        elif self._is_copy_key(event) or self._is_cut_key(event):
             # copy / cut the htnl to clipbrd first
             # by default, qt makes small adjustment to clipbrd html 
             super().keyPressEvent(event)
@@ -68,46 +83,41 @@ class s_text_edit_area(QTextEdit):
             clipbrd_html = clipbrd.mimeData().html()
             stripped_html = clipbrd_html
 
-            if self.is_list(cursor) and self.is_start_of_line(cursor) and not self.is_on_first_line(cursor):
-                stripped_html = self.strip_first_p_tag(stripped_html)
+            if self._is_list(cursor) and self._is_start_of_line(cursor) and not self._is_on_first_line(cursor):
+                stripped_html = self._strip_first_p_tag(stripped_html)
 
             
-            stripped_html = self.strip_qt_start_and_end_segments_tags(stripped_html)
+            stripped_html = self._strip_qt_start_and_end_segments_tags(stripped_html)
 
             new_cache = { }
-            new_cache[self.get_hash_of_str(clipbrd_html)] = stripped_html 
+            new_cache[self._get_hash_of_str(clipbrd_html)] = stripped_html 
 
-            self.set_qt_clipboard_cache(new_cache)
+            self._set_qt_clipboard_cache(new_cache)
 
-        elif self.is_paste_key(event):
+        elif self._is_paste_key(event):
             clipbrd_html = clipbrd.mimeData().html()
-            hashed_html = self.get_hash_of_str(clipbrd_html)
+            hashed_html = self._get_hash_of_str(clipbrd_html)
 
             html = ''
 
-            if self.is_the_same_qt_clipboard_cache(hashed_html):
+            if self._is_the_same_qt_clipboard_cache(hashed_html):
                 cursor = self.textCursor()
                 html = self.qt_clipbrd_cache[hashed_html]
                 
             else:
-                html = self.sanitize_tags(clipbrd_html)
+                html = self._sanitize_tags(clipbrd_html)
 
             
             cursor.insertHtml(html)
 
         elif event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
-            self.show_search_dialog()
+            self._show_search_dialog()
 
         else:
             super().keyPressEvent(event)
 
 
-    def show_search_dialog(self):
-        search_dialog = s_find_dialog(self)
-        search_dialog.exec_()
-
-
-    def on_cursor_position_changed(self):
+    def _on_cursor_position_changed(self):
         cursor = self.textCursor()
 
         block_format = cursor.blockFormat()
@@ -127,70 +137,79 @@ class s_text_edit_area(QTextEdit):
         action_map['right_align_action'].setChecked(True if block_format.alignment() == Qt.AlignRight else False)
 
 
-    def is_copy_key(
+    def _on_text_changed(self):
+        self.text_changed.emit({})
+        return
+
+
+    def _show_search_dialog(self):
+        s_find_dialog(self).exec_()
+
+
+    def _is_copy_key(
             self, 
             event
             ):
         return event.matches(QKeySequence.Copy)        
 
 
-    def is_cut_key(
+    def _is_cut_key(
             self, 
             event
             ):
         return event.matches(QKeySequence.Cut) 
 
 
-    def is_paste_key(
+    def _is_paste_key(
             self, 
             event
             ):
         return event.matches(QKeySequence.Paste)  
 
 
-    def is_delete_key(
+    def _is_delete_key(
             self, 
             event
             ):
         return event.key() == Qt.Key_Backspace
 
 
-    def is_delete_on_empty_line(
+    def _is_delete_on_empty_line(
             self, 
             cursor
             ):
-        return self.is_start_of_line(cursor) and not self.is_list(cursor)
+        return self._is_start_of_line(cursor) and not self._is_list(cursor)
 
 
-    def is_delete_on_empty_list(
+    def _is_delete_on_empty_list(
             self, 
             cursor
             ):
-        return self.is_start_of_line(cursor) and self.is_list(cursor)
+        return self._is_start_of_line(cursor) and self._is_list(cursor)
 
 
-    def is_on_first_line(
+    def _is_on_first_line(
             self, 
             cursor
             ):    
         return cursor.blockNumber() == 0
 
 
-    def is_start_of_line(
+    def _is_start_of_line(
             self, 
             cursor
             ):
         return cursor.positionInBlock() == 0
 
 
-    def is_list(
+    def _is_list(
             self, 
             cursor
             ):
         return cursor.currentList() != None
 
 
-    def is_list_above(
+    def _is_list_above(
             self, 
             cursor
             ):
@@ -202,7 +221,7 @@ class s_text_edit_area(QTextEdit):
         return is_list_above
     
 
-    def create_empty_list(
+    def _create_empty_list(
             self, 
             cursor
             ):
@@ -212,7 +231,7 @@ class s_text_edit_area(QTextEdit):
         cursor.createList(list_format)
 
 
-    def reset_indent(
+    def _reset_indent(
             self, 
             cursor
             ):
@@ -224,7 +243,7 @@ class s_text_edit_area(QTextEdit):
         self.setTextCursor(cursor)
 
 
-    def sanitize_tags(
+    def _sanitize_tags(
             self, 
             html
             ):
@@ -240,14 +259,14 @@ class s_text_edit_area(QTextEdit):
         return str(soup)
     
 
-    def set_qt_clipboard_cache(
+    def _set_qt_clipboard_cache(
             self, 
             cache
             ):
         self.qt_clipbrd_cache = cache
 
 
-    def is_the_same_qt_clipboard_cache(
+    def _is_the_same_qt_clipboard_cache(
             self, 
             key
             ):
@@ -256,7 +275,7 @@ class s_text_edit_area(QTextEdit):
 
     # remove <!--StartFragment--> and <!--EndFragment--> 
     # becuase they are sometimes inserted inproperly
-    def strip_qt_start_and_end_segments_tags(
+    def _strip_qt_start_and_end_segments_tags(
             self, 
             html
             ):
@@ -266,7 +285,7 @@ class s_text_edit_area(QTextEdit):
         return html
     
 
-    def strip_first_p_tag(
+    def _strip_first_p_tag(
             self, 
             html
             ):
@@ -283,7 +302,7 @@ class s_text_edit_area(QTextEdit):
         return html
 
 
-    def get_hash_of_str(
+    def _get_hash_of_str(
             self,
             _str
             ):
@@ -295,15 +314,3 @@ class s_text_edit_area(QTextEdit):
 
         return str(int(hex_digest, 16))
     
-
-    def highlight_selection(
-            self, 
-            cursor, 
-            start_pos, 
-            end_pos
-            ):
-        cursor.setPosition(start_pos)
-        cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
-        
-        self.setTextCursor(cursor)
-        

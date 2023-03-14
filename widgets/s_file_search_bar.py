@@ -58,20 +58,20 @@ class s_file_search_bar(QWidget):
         # layout.addWidget(self.ficon_label)
 
 
-    def set_list_view(
+    def set_file_list(
             self, 
-            list_view
+            file_list
             ):
         # Create an instance of the custom proxy model
         proxy_model = levenshtein_sort_proxy_model()
 
-        proxy_model.setSourceModel(list_view.src_model)
+        proxy_model.setSourceModel(file_list.src_model)
         proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
 
         # Set the proxy model as the model for the list widget
-        list_view.setModel(proxy_model)
+        file_list.setModel(proxy_model)
     
-        self.list_view = list_view
+        self.file_list = file_list
 
         # Connect the search bar's text changed signal to update the filter regex pattern for the proxy model
         self.search_line_edit.textChanged.connect(lambda text: proxy_model.setFilterRegExp(text))

@@ -1,5 +1,6 @@
 from config_reader import config_reader
 import core_helper
+from core_manager import core_manager
 import db_connector
 import fs_helper
 
@@ -28,43 +29,11 @@ if __name__ == '__main__':
 
     # print(config_reader.get_all_filepaths())
 
-    creader = config_reader('s_config.json')
+    creader = config_reader('./s_config.json')
 
     app = QApplication([])
 
-    all_fpaths = fs_helper.get_all_filepaths('./')
-    config_fpaths = creader.get_all_filepaths()
-
-    matched_result = fs_helper.find_matched_filepaths(all_fpaths, config_fpaths)
-
-    dangling_fpaths = matched_result['dangling_fpaths']
-
-    hl_fpaths = matched_result['matched_fpaths']
-    hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
-
-    tree_widget = s_file_tree(
-        'id', 
-        'project_1', 
-        './', 
-        all_fpaths, 
-        hl_fpaths,
-        hl_decorator)
-    
-    tree_widget.setMaximumWidth(300)
-    
-    list_model = QStandardItemModel()
-
-    item1 = QStandardItem("Item 1")
-    item2 = QStandardItem("Item 2")
-    item3 = QStandardItem("Item 3")
-
-    list_model.appendRow(item1)
-    list_model.appendRow(item2)
-    list_model.appendRow(item3)
-
-    list_view = s_file_list(list_model)
-
-    main_window = s_main_window(tree_widget, list_view)
+    main_window = s_main_window()
     
     main_window.resize(1200, 900)
     main_window.show()

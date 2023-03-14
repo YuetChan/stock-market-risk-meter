@@ -3,11 +3,14 @@ import json
 class config_reader:
 
     def __init__(
-        self, 
-        fname):
+            self, 
+            fname
+            ):
+        print(fname)
         with open(fname, 'r') as f:
             try:
                 json_obj = json.load(f)
+                print(json_obj)
                 if isinstance(json_obj, dict):
                     self.data = json_obj
 

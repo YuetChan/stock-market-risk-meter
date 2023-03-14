@@ -17,31 +17,24 @@ class s_find_dialog(QDialog):
         self.setWindowTitle("Find")
         
         layout = QVBoxLayout(self)
-        
-        # create the search input field
-        label = QLabel("Search for:")
+
+        layout.addWidget(QLabel("Search for:"))
 
         self.search_field = QLineEdit()
 
-        layout.addWidget(label)
         layout.addWidget(self.search_field)
         
-        # create the "Find Next" button
         find_button = QPushButton("Find Next")
 
         find_button.clicked.connect(self.search_text)
-
         layout.addWidget(find_button)
         
-        # create the "Cancel" button
         cancel_button = QPushButton("Cancel")
 
         cancel_button.clicked.connect(self.reject)
-
         layout.addWidget(cancel_button)
-
+    
         self.match_counts_label = QLabel("Match count:")
-
         layout.addWidget(self.match_counts_label)
         
 
@@ -55,21 +48,30 @@ class s_find_dialog(QDialog):
 
         search_text = self.search_field.text()
 
-        self.match_counts_label.setText(f'Match count: {self.get_match_count(search_text)}')
+        self.match_counts_label.setText(f'Match count: {self._get_match_count(search_text)}')
+        match = self._find_next_match(self.init_pos, search_text)
 
-        match = self.find_next_match(self.init_pos, search_text)
+        if match != None:
+            start_pos = match.position() - len(search_text)
+            end_pos = match.position()
 
-        print(match)
+            self.text_edit_area.highlight_selection(cursor, start_pos, end_pos)
+            self.init_pos = end_pos
 
-        start_pos = match.position() - len(search_text)
-        end_pos = match.position()
+        else:
+            self.init_pos = 0
 
-        self.text_edit_area.highlight_selection(cursor, start_pos, end_pos)
-
-        self.init_pos = end_pos
+            match = self._find_next_match(self.init_pos, search_text)
  
+            if match != None:
+                start_pos = match.position() - len(search_text)
+                end_pos = match.position()
 
-    def find_next_match(
+                self.text_edit_area.highlight_selection(cursor, start_pos, end_pos)
+                self.init_pos = end_pos
+
+            
+    def _find_next_match(
             self, 
             pos, 
             search_text
@@ -83,7 +85,7 @@ class s_find_dialog(QDialog):
             return None    
 
 
-    def get_match_count(
+    def _get_match_count(
             self, 
             search_text
             ):
@@ -104,4 +106,3 @@ class s_find_dialog(QDialog):
         return match_count
             
     
-

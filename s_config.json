@@ -1,5 +1,4 @@
 {
-    "id": "", 
-    "name": "sc-note",
-    "filepaths": ["./test.db", "./abcde.txt"]
+    "id": "id", 
+    "name": "sc-note"
 }

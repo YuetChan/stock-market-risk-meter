@@ -16,7 +16,7 @@ class s_text_edit_tool_bar(QToolBar):
 
         self.action_map = { }
 
-        self.init_ui()
+        self._init_actions()
 
 
     def set_main_window(
@@ -26,61 +26,95 @@ class s_text_edit_tool_bar(QToolBar):
         self.main_window = main_window
 
 
-    def init_ui(self):
-        self.init_bold_action()
-        self.init_italic_action()
-        self.init_underline_action()
+    def is_bullet_pt_checked(self):
+        return self.action_map['bullet_action'].isChecked()
+    
 
-        self.init_bullet_point_action()
-        # self.init_code_block()
+    def toggle_bullet_pt(self, checked):
+        self.action_map['bullet_action'].setChecked(checked)
+
+
+    def disable_all_actions(self):
+        for action in self.action_map.values():
+            action.setEnabled(False)
+            action.setChecked(False)
+
+
+    def default_all_actions(self):
+        action_map = self.action_map
+
+        for action in action_map.values():
+            action.setEnabled(True)
+            action.setChecked(False)
+
+
+        action_map['left_align_action'].setChecked(True)
+
+
+    def _init_actions(self):
+        self._init_bold_action()
+        self._init_italic_action()
+        self._init_underline_action()
+
+        self._init_bullet_point_action()
         
-        self.init_left_align()
-        self.init_center_align()
-        self.init_right_align()
+        self._init_left_align()
+        self._init_center_align()
+        self._init_right_align()
 
-        self.init_redo_action()
-        self.init_undo_action()
+        self._init_redo_action()
+        self._init_undo_action()
 
 
-    def init_bold_action(self):
+    def _init_bold_action(self):
         bold_action = QAction(QIcon().fromTheme('format-text-bold'), 'Bold', self)
         
         bold_action.triggered.connect(
-            lambda checked: self.set_text_style('bold', checked))
+            lambda checked: self._set_text_style('bold', checked))
         bold_action.setCheckable(True)
+
+        bold_action.setToolTip('Bold')
 
         self.addAction(bold_action)
         self.action_map['bold_action'] = bold_action
 
 
-    def init_italic_action(self):
+    def _init_italic_action(self):
         italic_action = QAction(QIcon().fromTheme('format-text-italic'), 'Italic', self)
         
         italic_action.triggered.connect(
-            lambda checked: self.set_text_style('italic', checked))
+            lambda checked: self._set_text_style('italic', checked))
         italic_action.setCheckable(True)
+
+        italic_action.setToolTip('Italic')
 
         self.addAction(italic_action)
         self.action_map['italic_action'] = italic_action
 
 
-    def init_underline_action(self):
+    def _init_underline_action(self):
         underline_action = QAction(QIcon().fromTheme('format-text-underline'), 'Underline', self)
         
         underline_action.triggered.connect(
-            lambda checked: self.set_text_style('underline', checked))
+            lambda checked: self._set_text_style('underline', checked))
         underline_action.setCheckable(True)
+
+        underline_action.setToolTip('Underline')
 
         self.addAction(underline_action)   
         self.action_map['underline_action'] = underline_action
 
 
-    def init_bullet_point_action(self):
-        bullet_action = QAction(QIcon().fromTheme('format-list-unordered'), 'Bullet Points', self)
+    def _init_bullet_point_action(self):
+        icon = QIcon('./resources/list-solid.svg')
+
+        bullet_action = QAction(icon, 'Bullet Points', self)
         
         bullet_action.setCheckable(True)
         bullet_action.triggered.connect(
-            lambda checked: self.add_bullet_point(checked))
+            lambda checked: self._add_bullet_point(checked))
+
+        bullet_action.setToolTip('Bullet Points')
 
         self.addAction(bullet_action)
         self.action_map['bullet_action'] = bullet_action
@@ -95,59 +129,76 @@ class s_text_edit_tool_bar(QToolBar):
     #     self.addAction(code_block_action)
 
 
-    def init_left_align(self):
+    def _init_left_align(self):
         left_align_action = QAction(QIcon().fromTheme('format-justify-left'), 'Align Left', self)
         
         left_align_action.triggered.connect(
-            lambda: self.set_text_alignment('left'))
+            lambda: self._set_text_alignment('left'))
+        
         left_align_action.setCheckable(True)
         left_align_action.setChecked(True)
+
+        left_align_action.setToolTip('Left Align')
 
         self.addAction(left_align_action)
         self.action_map['left_align_action'] = left_align_action
 
 
-    def init_center_align(self):
+    def _init_center_align(self):
         center_align_action = QAction(QIcon().fromTheme('format-justify-center'), 'Align Center', self)
         
         center_align_action.triggered.connect(
-            lambda: self.set_text_alignment('center'))
+            lambda: self._set_text_alignment('center'))
         center_align_action.setCheckable(True)
+
+        center_align_action.setToolTip('Center Align')
 
         self.addAction(center_align_action)
         self.action_map['center_align_action'] = center_align_action
 
 
-    def init_right_align(self):   
+    def _init_right_align(self):   
         right_align_action = QAction(QIcon().fromTheme('format-justify-right'), 'Align Right', self)
         
         right_align_action.triggered.connect(
-            lambda: self.set_text_alignment('right'))
+            lambda: self._set_text_alignment('right'))
         right_align_action.setCheckable(True)
+
+        right_align_action.setToolTip('Right Align')
 
         self.addAction(right_align_action)
         self.action_map['right_align_action'] = right_align_action
 
 
-    def init_undo_action(self):
-        undo_action = QAction('Undo', self)
+    def _init_undo_action(self):
+        icon = QIcon('./resources/rotate-left-solid.svg')
+
+        undo_action = QAction(icon, 'Undo', self)
 
         undo_action.setShortcut('Ctrl+Z')
         undo_action.triggered.connect(self.text_edit_area.undo)
 
+        undo_action.setToolTip('Undo')
+
         self.addAction(undo_action)
+        self.action_map['undo_action'] = undo_action
 
 
-    def init_redo_action(self):
-        redo_action = QAction('Redo', self)
+    def _init_redo_action(self):
+        icon = QIcon('./resources/rotate-right-solid.svg')
+
+        redo_action = QAction(icon, 'Redo', self)
 
         redo_action.setShortcut('Ctrl+Y')
         redo_action.triggered.connect(self.text_edit_area.redo)
         
+        redo_action.setToolTip('Redo')
+
         self.addAction(redo_action)
+        self.action_map['redo_action'] = redo_action
 
 
-    def set_text_style(
+    def _set_text_style(
             self, 
             style, 
             checked=True
@@ -173,7 +224,7 @@ class s_text_edit_tool_bar(QToolBar):
         text_edit_area.setCurrentCharFormat(char_format)
 
 
-    def set_text_alignment(
+    def _set_text_alignment(
             self, 
             alignment
             ):
@@ -199,7 +250,7 @@ class s_text_edit_tool_bar(QToolBar):
             action_map['center_align_action'].setChecked(False)
 
 
-    def add_bullet_point(
+    def _add_bullet_point(
             self, 
             checked=True
             ):
@@ -244,19 +295,4 @@ class s_text_edit_tool_bar(QToolBar):
 
     #     # self.global_char_format = char_format
     #     self.text_edit_area.setCurrentCharFormat(char_format)
-
-
-    def format_for(
-            self, 
-            style
-            ):
-        return self.text_edit_area.document().rootFrame().frameFormat().property(style)
-    
-
-    def is_bullet_pt_checked(self):
-        return self.action_map['bullet_action'].isChecked()
-    
-
-    def toggle_bullet_pt(self, checked):
-        self.action_map['bullet_action'].setChecked(checked)
 

@@ -1,32 +1,34 @@
 import os
 
-def get_all_filepaths(root_dir):
-  file_paths = []
-  for root, dirs, files in os.walk(root_dir):
-    for file in files:
-      file_paths.append(os.path.join(root, file))
+class fs_helper:
+    
+    def get_all_filepaths(root_dir):
+      file_paths = []
+      for root, dirs, files in os.walk(root_dir):
+          for file in files:
+              file_paths.append(os.path.join(root, file))
   
 
-  return file_paths
+      return file_paths
 
 
-def find_matched_filepaths(
-      all_fpaths, 
-      fpaths):
-    dangling_fpaths = []
-    matched_fpaths = []
+# def find_matched_filepaths(
+#       all_fpaths, 
+#       fpaths):
+#     dangling_fpaths = []
+#     matched_fpaths = []
 
-    for fpath in fpaths:
-        if fpath not in all_fpaths:
-          dangling_fpaths.append(fpath)
-        else:
-          matched_fpaths.append(fpath)   
+#     for fpath in fpaths:
+#         if fpath not in all_fpaths:
+#           dangling_fpaths.append(fpath)
+#         else:
+#           matched_fpaths.append(fpath)   
 
 
-    return {
-       'dangling_fpaths': dangling_fpaths,
-       'matched_fpaths': matched_fpaths
-    }
+#     return {
+#        'dangling_fpaths': dangling_fpaths,
+#        'matched_fpaths': matched_fpaths
+#     }
 
 
 # def get_dir_to_files(filepaths, dirpaths):

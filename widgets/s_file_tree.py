@@ -78,17 +78,17 @@ class s_file_tree(QTreeView):
 
 
     def decorate_item(
-        self, 
-        item
-      ):
+            self, 
+            item
+            ):
         self.hl_decorator(item)
 
 
     def print_tree(
-        self, 
-        parent=None, 
-        indent=0
-        ):
+            self, 
+            parent=None, 
+            indent=0
+            ):
         if not parent:
             parent = self.invisibleRootItem()
 
@@ -101,8 +101,8 @@ class s_file_tree(QTreeView):
 
 
     def get_filename_with_suffix(
-        self, 
-        name
-        ): 
+            self, 
+            name
+            ): 
         return os.path.splitext(name)[0] + os.path.splitext(name)[1]
 

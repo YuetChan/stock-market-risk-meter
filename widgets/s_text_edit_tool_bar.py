@@ -1,6 +1,6 @@
-from PyQt5.QtCore import Qt, QRegExp
-from PyQt5.QtWidgets import QAction, QToolBar, QColorDialog, QDialog
-from PyQt5.QtGui import QFont, QTextCharFormat, QBrush, QTextListFormat, QIcon, QTextBlockFormat, QColor, QTextCursor
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QAction, QToolBar
+from PyQt5.QtGui import QFont, QTextListFormat, QIcon, QTextCursor
 
 class s_text_edit_tool_bar(QToolBar):
 
@@ -251,4 +251,12 @@ class s_text_edit_tool_bar(QToolBar):
             style
             ):
         return self.text_edit_area.document().rootFrame().frameFormat().property(style)
+    
+
+    def is_bullet_pt_checked(self):
+        return self.action_map['bullet_action'].isChecked()
+    
+
+    def toggle_bullet_pt(self, checked):
+        self.action_map['bullet_action'].setChecked(checked)
 

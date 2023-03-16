@@ -6,20 +6,20 @@ class config_reader:
             self, 
             fname
             ):
-        print(fname)
         with open(fname, 'r') as f:
             try:
                 json_obj = json.load(f)
-                print(json_obj)
+
                 if isinstance(json_obj, dict):
                     self.data = json_obj
+                    self.is_valid = self.data['id'] != None and self.data['name'] != None
 
                 else:
-                    print("'data' is not a valid JSON object")
+                    self.is_valid = False
 
 
             except json.JSONDecodeError:
-              print("'data' is not a valid JSON object")
+                self.is_valid = False
 
 
     def get_project_id(self):
@@ -28,10 +28,6 @@ class config_reader:
 
     def get_project_name(self):
         return self.data['name']
-
-
-    def get_all_filepaths(self):
-        return self.data['filepaths']
 
 
     def get_data_source(self):

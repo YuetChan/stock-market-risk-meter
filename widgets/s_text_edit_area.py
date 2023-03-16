@@ -139,7 +139,6 @@ class s_text_edit_area(QTextEdit):
 
     def _on_text_changed(self):
         self.text_changed.emit({})
-        return
 
 
     def _show_search_dialog(self):
@@ -274,7 +273,7 @@ class s_text_edit_area(QTextEdit):
 
 
     # remove <!--StartFragment--> and <!--EndFragment--> 
-    # becuase they are sometimes inserted inproperly
+    # becuase they are sometimes inserted inproperly by qt
     def _strip_qt_start_and_end_segments_tags(
             self, 
             html
@@ -289,10 +288,10 @@ class s_text_edit_area(QTextEdit):
             self, 
             html
             ):
-        soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, 'html.parser')
 
         # extract first p tag to remove newline char at the start of line
-        first_p = soup.find("p")
+        first_p = soup.find('p')
 
         if first_p != None:
             first_p.extract()

@@ -19,7 +19,7 @@ class core_manager:
         self.text_edit_tool_bar = text_edit_tool_bar
 
         self.file_tree.file_clicked.connect(lambda data : self.open_note(data['file_path'], data['is_dir']))
-        self.text_edit_area.text_changed.connect(lambda data : print('content changed'))
+        self.text_edit_area.text_changed.connect(lambda data : self.auto_save_note(data))
 
         self.core_helper = core_helper
 
@@ -61,8 +61,8 @@ class core_manager:
         return
 
 
-    def auto_save_note(self, fpath):
-        self.save_note(fpath)
+    def auto_save_note(self, data):
+        self.save_note(self.file_tree.curr_fpath)
 
 
     def save_note(self, fpath):

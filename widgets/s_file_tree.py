@@ -19,17 +19,24 @@ class s_file_tree(QTreeView):
             ):
         super(s_file_tree, self).__init__(parent)
 
+        self.curr_fpath = None
+
         self.id = id
 
         self.root_dir = root_dir
 
         self.hl_fpaths = hl_fpaths
         self.hl_decorator = hl_decorator
+        
 
         self.setModel(self._populate(self.root_dir, label))
         self.expand(self.model().index(0, 0))
 
         self.clicked.connect(self._on_treeview_clicked)
+
+
+    def get_selected_file(self):
+        return self.curr_fpath
 
 
     def print_tree(
@@ -82,8 +89,6 @@ class s_file_tree(QTreeView):
             if not os.path.isdir(fpath):
                 item = QStandardItem(fname)
                 
-                # relative_fpath = fpath.replace(self.root_dir, '.')
-            
                 item.setData(QVariant([fpath, False]), Qt.UserRole)
 
                 if fpath in self.hl_fpaths:
@@ -118,9 +123,10 @@ class s_file_tree(QTreeView):
         
         labels = item.data(Qt.UserRole)
 
+        self.curr_fpath = labels[0]
+
         self.file_clicked.emit({
             'file_path': labels[0],
             'is_dir': labels[1]
         })
-
 

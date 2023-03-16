@@ -12,7 +12,7 @@ class db_connector:
     self.conn.close()
 
 
-  def getConnection(self):
+  def get_connection(self):
     return self.conn
 
 

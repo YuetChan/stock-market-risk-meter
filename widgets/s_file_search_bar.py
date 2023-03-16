@@ -10,13 +10,10 @@ class levenshtein_sort_proxy_model(QSortFilterProxyModel):
             left_index, 
             right_index
             ):
-        left_data = self.sourceModel().data(left_index)
-        right_data = self.sourceModel().data(right_index)
-
         return Levenshtein.ratio(
-            left_data, 
+            self.sourceModel().data(left_index), 
             self.filterRegExp().pattern()) < Levenshtein.ratio(
-            right_data, 
+            self.sourceModel().data(right_index), 
             self.filterRegExp().pattern())
     
 
@@ -40,22 +37,6 @@ class s_file_search_bar(QWidget):
         layout.addWidget(self.search_line_edit)
 
         self.search_line_edit.setPlaceholderText('Search...')
-
-
-        # # Add a spacer item to create some space between the icon and the line edit
-        # spacer_item = QSpacerItem(4, 1, QSizePolicy.Fixed, QSizePolicy.Fixed)
-
-        # layout.addItem(spacer_item)
-
-        # # Create a label for the file icon
-        # ficon = QIcon.fromTheme('text-x-generic')
-
-        # self.ficon_label = QLabel(self)
-
-        # self.ficon_label.setPixmap(ficon.pixmap(16, 16))
-        # self.ficon_label.setAlignment(Qt.AlignCenter)
-
-        # layout.addWidget(self.ficon_label)
 
 
     def set_file_list(

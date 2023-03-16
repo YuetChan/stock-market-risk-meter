@@ -28,44 +28,15 @@ class s_main_window(QMainWindow):
             ):
         super(s_main_window, self).__init__(parent)
         
-        self.init_ui()
-
-        db = db_connector('./resources/test.db')
-
-        self.db_conn = db.getConnection()
+        self._init_dialogs_ui()
+        self._init_actions_ui()
         
-        self.c_helper = core_helper(self.db_conn)
-        
+        self.c_helper = core_helper(db_connector('./resources/test.db').get_connection())
+
         self.c_config = { }
-
         self.c_manager = None
 
-
-    def init_ui(self):
-        self.setWindowTitle('Sc Note')
-
-        fileMenu = QMenu('File', self)
-
-        self.menuBar().addMenu(fileMenu)
-
-        newAction = QAction('New Project', self)
-
-        newAction.triggered.connect(self.create_new_project)
-
-        fileMenu.addAction(newAction)
-
-        openAction = QAction('Open Project', self)
-
-        openAction.triggered.connect(self.open_project)
-
-        fileMenu.addAction(openAction)
-
-        auto_save_action = QAction('Auto Save', self)
-
-        auto_save_action.setCheckable(False)
-        auto_save_action.setIcon(QIcon('./resources/check-solid.svg'))
-
-        fileMenu.addAction(auto_save_action)
+        self.default_config_fname = 's_config.json'
 
 
     def create_new_project(self):
@@ -76,7 +47,7 @@ class s_main_window(QMainWindow):
             QFileDialog.ShowDirsOnly
             )
 
-        if os.path.exists(os.path.join(self.c_config['root_dir'], 's_config.json')):
+        if os.path.exists(os.path.join(self.c_config['root_dir'], self.default_config_fname)):
             QMessageBox.critical(
                 None, 
                 'Error', 
@@ -84,8 +55,8 @@ class s_main_window(QMainWindow):
                 )
                 
         else:
-            if self.prompt_project_config():
-                self.init_core_ui()
+            if self._prompt_project_config():
+                self._init_core_ui()
 
             else:
                 QMessageBox.critical(
@@ -93,35 +64,7 @@ class s_main_window(QMainWindow):
                     'Error', 
                     'Failed to create a configuration file.'
                     )
-
-
-    def prompt_project_config(self):
-        dialog = s_project_config_dialog()
-
-        if dialog.exec_() == QDialog.Accepted:
-            self.c_config['project_name'] = dialog.get_project_name()
-            self.c_config['project_id'] = str(uuid.uuid4())
-
-            try:    
-                with open(os.path.join(self.c_config['root_dir'], 's_config.json'), 'w') as f:
-                    json.dump({
-                        'id': self.c_config['project_id'],
-                        'name': self.c_config['project_name']
-                    }, f)
-
-                return True
-
-            except Exception as e:
-                print("Error occurred while writing data to file:", e)
-
-                return False
-
-
-        else:
-            print("Project config dialog rejected")
-
-            return False
-
+                
 
     def open_project(self):
         self.c_config['root_dir'] = QFileDialog.getExistingDirectory(
@@ -131,21 +74,23 @@ class s_main_window(QMainWindow):
             QFileDialog.ShowDirsOnly
         )
 
-        if os.path.exists(os.path.join(self.c_config['root_dir'], 's_config.json')):
-            c_reader = config_reader('s_config.json')
+        if os.path.exists(os.path.join(self.c_config['root_dir'], self.default_config_fname)):
+            c_reader = config_reader(self.default_config_fname)
 
             if c_reader.is_valid:
                 self.c_config['project_id'] = c_reader.get_project_id()
                 self.c_config['project_name'] = c_reader.get_project_name()
             
+                self._init_core_ui()
+
             else:
                 QMessageBox.critical(
                     None, 
                     'Error', 
                     'The selected directory does not contain a valid configuration.'
                     )
+  
 
-                return
         else:
             QMessageBox.critical(
                 None, 
@@ -153,32 +98,111 @@ class s_main_window(QMainWindow):
                 'The selected directory does not contain a configuration file.'
                 )
 
-            return
+
+    def _init_dialogs_ui(self):
+        self.dialog = s_project_config_dialog()
 
 
-        self.init_core_ui()
+    def _init_actions_ui(self):
+        self.setWindowTitle('Sc Note')
+
+        self._init_file_menu()
+
+        self._init_new_project_action()
+        self._init_open_project_action()
+
+        self._init_auto_save_action()
 
 
-    def init_core_ui(self):
-        root_dir = self.c_config['root_dir']
+    def _init_file_menu(self):
+        fileMenu = QMenu('File', self)
 
-        project_id = self.c_config['project_id']
-        project_name = self.c_config['project_name']
+        self.menuBar().addMenu(fileMenu)
 
-        all_fpaths = fs_helper.get_all_filepaths(root_dir)
-       
-        c_helper = self.c_helper
+    
+    def _init_new_project_action(self):
+        action = QAction('Open Project', self)
 
-        hl_fpaths = c_helper.select_filepaths_with_non_empty_note_by_project_id_n_filepaths_in(
-            project_id, 
+        action.triggered.connect(self.create_new_project)
+        self.menuBar().findChild(QMenu, 'File').addAction(action)
+
+
+    def _init_open_project_action(self):
+        action = QAction('Open Project', self)
+
+        action.triggered.connect(self.open_project)
+        self.menuBar().findChild(QMenu, 'File').addAction(action)
+
+
+    def _init_auto_save_action(self):
+        action = QAction('Auto Save', self)
+
+        action.setCheckable(False)
+        action.setIcon(QIcon('./resources/check-solid.svg'))
+
+        self.menuBar().findChild(QMenu, 'File').addAction(action)
+
+
+    def _prompt_project_config(self):
+        if self.dialog.exec_() == QDialog.Accepted:
+            self.c_config['project_name'] = self.dialog.get_project_name()
+            self.c_config['project_id'] = str(uuid.uuid4())
+
+            try:    
+                with open(os.path.join(self.c_config['root_dir'], self.default_config_fname), 'w') as f:
+                    json.dump({
+                        'id': self.c_config['project_id'],
+                        'name': self.c_config['project_name']
+                    }, f)
+
+                return True
+
+            except Exception as e:
+                print("Error occurred while writing data to file:", e)
+                return False
+
+
+        else:
+            print("Project config dialog rejected")
+            return False
+        
+
+    def _init_core_ui(self):
+        self._init_file_tree()
+        self._init_file_list()
+
+        self._init_text_edit()
+
+        central_splitter = QSplitter()
+    
+        central_splitter.addWidget(self._get_left_panel())
+        central_splitter.addWidget(self._get_right_panel())
+    
+        self.setCentralWidget(central_splitter)
+        
+        self.c_manager = core_manager(
+            self.c_config['project_id'], 
+            self.file_tree, 
+            self.text_edit_area_label, 
+            self.text_edit_area, 
+            self.text_edit_tool_bar, 
+            self.c_helper
+            )
+
+
+    def _init_file_tree(self):
+        all_fpaths = fs_helper.get_all_filepaths(self.c_config['root_dir'])
+
+        hl_fpaths = self.c_helper.select_filepaths_with_non_empty_note_by_project_id_n_filepaths_in(
+            self.c_config['project_id'], 
             all_fpaths
             )
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
         file_tree = s_file_tree(
-            project_id, 
-            project_name, 
-            root_dir, 
+            self.c_config['project_id'], 
+            self.c_config['project_name'], 
+            self.c_config['root_dir'], 
             hl_fpaths,
             hl_decorator)
     
@@ -186,6 +210,8 @@ class s_main_window(QMainWindow):
 
         self.file_tree = file_tree
 
+
+    def _init_file_list(self):
         list_model = QStandardItemModel()
 
         item1 = QStandardItem('Item 1')
@@ -196,14 +222,16 @@ class s_main_window(QMainWindow):
         list_model.appendRow(item2)
         list_model.appendRow(item3)
 
-        file_list = s_file_list(list_model)
+        self.file_list =  s_file_list(list_model)
 
-        self.file_list = file_list
+        self.search_bar_title = QLabel('Dangling Notes')
 
-        search_bar_widget = s_file_search_bar(self)
+        self.search_bar = s_file_search_bar(self)
 
-        search_bar_widget.set_file_list(file_list)
+        self.search_bar.set_file_list(self.file_list)
 
+
+    def _init_text_edit(self):
         self.text_edit_area_label = QLabel('')
 
         self.text_edit_area = s_text_edit_area()
@@ -212,58 +240,40 @@ class s_main_window(QMainWindow):
 
         self.text_edit_tool_bar.set_main_window(self)
 
-        # Create a label for the title
-        search_bar_title = QLabel('Dangling Notes')
 
-        # Create layout for search bar and list widget
-        vbox1 = QVBoxLayout()
+    def _get_left_panel(self):
+        v_box = QVBoxLayout()
 
-        vbox1.addWidget(search_bar_title)
-        vbox1.addWidget(search_bar_widget)
-        vbox1.addWidget(file_list)
+        v_box.addWidget(self.search_bar_title)
+        v_box.addWidget(self.search_bar)
 
-        # Create widget to hold search bar and list widget
-        left_panel_widget = QWidget()
+        v_box.addWidget(self.file_list)
 
-        left_panel_widget.setLayout(vbox1)
+        file_list_widget = QWidget()
 
-        # Create splitter
-        splitter1 = QSplitter()
+        file_list_widget.setLayout(v_box)
 
-        splitter1.addWidget(self.file_tree)
-        splitter1.addWidget(left_panel_widget)
+        left_panel = QSplitter()
 
-        # Vertical splitter
-        splitter1.setOrientation(Qt.Vertical)  
-        splitter1.setSizes([600, 300])
-        
-        # Create layout for tool bar and text edit area
-        vbox2 = QVBoxLayout()
+        left_panel.addWidget(self.file_tree)
+        left_panel.addWidget(file_list_widget)
 
-        vbox2.addWidget(self.text_edit_area_label)
-        vbox2.addWidget(self.text_edit_tool_bar)
-        vbox2.addWidget(self.text_edit_area)
+        left_panel.setOrientation(Qt.Vertical)  
+        left_panel.setSizes([600, 300])
 
-        # Create widget to hold search bar and list widget
-        right_panel_widget = QWidget()
-
-        right_panel_widget.setLayout(vbox2)
-
-        # Create another splitter for left and right sides
-        splitter2 = QSplitter()
+        return left_panel
     
-        splitter2.addWidget(splitter1)
-        splitter2.addWidget(right_panel_widget)
-    
-        # Set the main window widget
-        self.setCentralWidget(splitter2)
-        
-        self.c_manager = core_manager(
-            'id', 
-            self.file_tree, 
-            self.text_edit_area_label, 
-            self.text_edit_area, 
-            self.text_edit_tool_bar, 
-            c_helper
-            )
 
+    def _get_right_panel(self):
+        v_box = QVBoxLayout()
+
+        v_box.addWidget(self.text_edit_area_label)
+
+        v_box.addWidget(self.text_edit_tool_bar)
+        v_box.addWidget(self.text_edit_area)
+
+        right_panel = QWidget()
+
+        right_panel.setLayout(v_box)
+
+        return right_panel

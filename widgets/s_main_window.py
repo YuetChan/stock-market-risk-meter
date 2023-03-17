@@ -31,6 +31,11 @@ class s_main_window(QMainWindow):
         self._init_dialogs_ui()
         self._init_actions_ui()
         
+        self.left_panel = None
+        self.right_panel = None
+
+        self.central_splitter = None
+
         self.c_helper = core_helper(db_connector('./resources/test.db').get_connection())
 
         self.c_config = { }
@@ -40,6 +45,9 @@ class s_main_window(QMainWindow):
 
 
     def create_new_project(self):
+        # clean up previous widgets
+        self._clean_up()
+
         self.c_config['root_dir'] = QFileDialog.getExistingDirectory(            
             None,
             'Select a folder:',
@@ -67,6 +75,9 @@ class s_main_window(QMainWindow):
                 
 
     def open_project(self):
+        # clean up previous widgets
+        self._clean_up()
+
         self.c_config['root_dir'] = QFileDialog.getExistingDirectory(
             None,
             'Select a folder:',
@@ -115,23 +126,23 @@ class s_main_window(QMainWindow):
 
 
     def _init_file_menu(self):
-        fileMenu = QMenu('File', self)
+        self.file_menu = QMenu('File', self)
 
-        self.menuBar().addMenu(fileMenu)
+        self.menuBar().addMenu(self.file_menu)
 
     
     def _init_new_project_action(self):
-        action = QAction('Open Project', self)
+        action = QAction('New Project', self)
 
         action.triggered.connect(self.create_new_project)
-        self.menuBar().findChild(QMenu, 'File').addAction(action)
+        self.file_menu.addAction(action)
 
 
     def _init_open_project_action(self):
         action = QAction('Open Project', self)
 
         action.triggered.connect(self.open_project)
-        self.menuBar().findChild(QMenu, 'File').addAction(action)
+        self.file_menu.addAction(action)
 
 
     def _init_auto_save_action(self):
@@ -140,7 +151,7 @@ class s_main_window(QMainWindow):
         action.setCheckable(False)
         action.setIcon(QIcon('./resources/check-solid.svg'))
 
-        self.menuBar().findChild(QMenu, 'File').addAction(action)
+        self.file_menu.addAction(action)
 
 
     def _prompt_project_config(self):
@@ -173,12 +184,15 @@ class s_main_window(QMainWindow):
 
         self._init_text_edit()
 
-        central_splitter = QSplitter()
+        self._init_left_panel()
+        self._init_right_panel()
+
+        self.central_splitter = QSplitter()
     
-        central_splitter.addWidget(self._get_left_panel())
-        central_splitter.addWidget(self._get_right_panel())
-    
-        self.setCentralWidget(central_splitter)
+        self.central_splitter.addWidget(self.left_panel)
+        self.central_splitter.addWidget(self.right_panel)
+
+        self.setCentralWidget(self.central_splitter)
         
         self.c_manager = core_manager(
             self.c_config['project_id'], 
@@ -193,22 +207,27 @@ class s_main_window(QMainWindow):
     def _init_file_tree(self):
         all_fpaths = fs_helper.get_all_filepaths(self.c_config['root_dir'])
 
-        hl_fpaths = self.c_helper.select_filepaths_with_non_empty_note_by_project_id_n_filepaths_in(
+        fpath_rows = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_in(
             self.c_config['project_id'], 
             all_fpaths
             )
+        
+        hl_fpaths = []
+
+        for row in fpath_rows:
+            hl_fpaths.append(row[0])
+
+
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
-        file_tree = s_file_tree(
+        self.file_tree = s_file_tree(
             self.c_config['project_id'], 
             self.c_config['project_name'], 
             self.c_config['root_dir'], 
             hl_fpaths,
             hl_decorator)
     
-        file_tree.setMaximumWidth(300)
-
-        self.file_tree = file_tree
+        self.file_tree.setMaximumWidth(300)
 
 
     def _init_file_list(self):
@@ -241,7 +260,7 @@ class s_main_window(QMainWindow):
         self.text_edit_tool_bar.set_main_window(self)
 
 
-    def _get_left_panel(self):
+    def _init_left_panel(self):
         v_box = QVBoxLayout()
 
         v_box.addWidget(self.search_bar_title)
@@ -253,18 +272,16 @@ class s_main_window(QMainWindow):
 
         file_list_widget.setLayout(v_box)
 
-        left_panel = QSplitter()
+        self.left_panel = QSplitter()
 
-        left_panel.addWidget(self.file_tree)
-        left_panel.addWidget(file_list_widget)
+        self.left_panel.addWidget(self.file_tree)
+        self.left_panel.addWidget(file_list_widget)
 
-        left_panel.setOrientation(Qt.Vertical)  
-        left_panel.setSizes([600, 300])
+        self.left_panel.setOrientation(Qt.Vertical)  
+        self.left_panel.setSizes([600, 300])
 
-        return left_panel
-    
 
-    def _get_right_panel(self):
+    def _init_right_panel(self):
         v_box = QVBoxLayout()
 
         v_box.addWidget(self.text_edit_area_label)
@@ -272,8 +289,12 @@ class s_main_window(QMainWindow):
         v_box.addWidget(self.text_edit_tool_bar)
         v_box.addWidget(self.text_edit_area)
 
-        right_panel = QWidget()
+        self.right_panel = QWidget()
 
-        right_panel.setLayout(v_box)
+        self.right_panel.setLayout(v_box)
+    
 
-        return right_panel
+    def _clean_up(self):
+        if self.central_splitter != None:
+            self.central_splitter.deleteLater()
+

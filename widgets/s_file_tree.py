@@ -2,7 +2,7 @@ import os
 
 from PyQt5.QtCore import Qt, QVariant, pyqtSignal
 from PyQt5.QtWidgets import QTreeView
-from PyQt5.QtGui import QStandardItemModel, QStandardItem
+from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor
 
 class s_file_tree(QTreeView):
 
@@ -19,7 +19,10 @@ class s_file_tree(QTreeView):
             ):
         super(s_file_tree, self).__init__(parent)
 
-        self.curr_fpath = None
+        self.selected_fpath = None
+        self.is_dir_selected = None
+
+        self.selected_item = None
 
         self.id = id
 
@@ -27,33 +30,36 @@ class s_file_tree(QTreeView):
 
         self.hl_fpaths = hl_fpaths
         self.hl_decorator = hl_decorator
-        
 
+        self.default_decorator = lambda item: item.setForeground(QBrush(QColor('black')))
+        
         self.setModel(self._populate(self.root_dir, label))
         self.expand(self.model().index(0, 0))
 
         self.clicked.connect(self._on_treeview_clicked)
 
 
-    def get_selected_file(self):
-        return self.curr_fpath
+    def decorate_selected_file(self):
+         self._decorate_item(self.selected_item)
 
 
-    def print_tree(
+    def undecorate_selected_file(self):
+        self._undecorate_item(self.selected_item)
+
+
+    def _decorate_item(
             self, 
-            parent=None, 
-            indent=0
+            item
             ):
-        if not parent:
-            parent = self.invisibleRootItem()
+        self.hl_decorator(item)
 
 
-        for i in range(parent.rowCount()):
-            child = parent.child(i)
-            
-            print(" " * indent + str(child.text()))
-            self.print_tree(child, indent + 2)
-
+    def _undecorate_item(
+            self,
+            item
+            ):
+        self.default_decorator(item)
+        
 
     def _populate(
             self, 
@@ -108,25 +114,19 @@ class s_file_tree(QTreeView):
                 self._add_files(item, fpath, model)
 
 
-    def _decorate_item(
-            self, 
-            item
-            ):
-        self.hl_decorator(item)
-
-
     def _on_treeview_clicked(
             self, 
             index
             ):
-        item = self.model().itemFromIndex(index)
+        self.selected_item = self.model().itemFromIndex(index)
         
-        labels = item.data(Qt.UserRole)
+        labels = self.selected_item.data(Qt.UserRole)
 
-        self.curr_fpath = labels[0]
+        self.selected_fpath = labels[0]
+        self.is_dir_selected = labels[1]
 
         self.file_clicked.emit({
-            'file_path': labels[0],
-            'is_dir': labels[1]
+            'file_path': self.selected_fpath,
+            'is_dir': self.is_dir_selected
         })
 

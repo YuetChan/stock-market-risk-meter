@@ -41,12 +41,13 @@ class core_helper:
     def add_note_by_filepath_n_project_id(
             self, 
             note, 
+            plain_text_note,
             fpath, 
             project_id
             ):
         cursor = self.conn.cursor()
-        cursor.execute("INSERT INTO note(project_id, filepath, note) VALUES(?, ?, ?)", 
-                   (project_id, fpath, note, ))
+        cursor.execute("INSERT OR REPLACE INTO note(project_id, filepath, note, plain_text_note) VALUES(?, ?, ?, ?)", 
+                   (project_id, fpath, note, plain_text_note))
         
         num_rows_affected = cursor.rowcount
         self.conn.commit()
@@ -54,26 +55,26 @@ class core_helper:
         return num_rows_affected
 
 
-    def update_note_by_filepath_n_project_id(
-            self, 
-            note, 
-            fpath, 
-            project_id
-            ):
-        cursor = self.conn.cursor()
-        cursor.execute("UPDATE note set note = ? WHERE filepath = ? AND project_id = ?", 
-                   (note, fpath, project_id, ))
+    # def update_note_by_filepath_n_project_id(
+    #         self, 
+    #         note, 
+    #         fpath, 
+    #         project_id
+    #         ):
+    #     cursor = self.conn.cursor()
+    #     cursor.execute("UPDATE note set note = ? WHERE filepath = ? AND project_id = ?", 
+    #                (note, fpath, project_id, ))
         
-        num_rows_affected = cursor.rowcount
-        self.conn.commit()
+    #     num_rows_affected = cursor.rowcount
+    #     self.conn.commit()
         
-        return num_rows_affected
+    #     return num_rows_affected
 
 
-    def select_filepaths_with_non_empty_note_by_project_id_n_filepaths_in(self, project_id, fpaths):
+    def select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_in(self, project_id, fpaths):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT filepath FROM note WHERE project_id = ? and note != '' and filepath IN {}".format(tuple(fpaths)), 
-                       (project_id,))
+        cursor.execute("SELECT filepath FROM note WHERE project_id = ? and plain_text_note != '' and filepath IN {}".format(tuple(fpaths)), 
+                       (project_id, ))
         
         rows = cursor.fetchall()
         self.conn.commit()
@@ -81,41 +82,41 @@ class core_helper:
         return rows
 
 
-    def select_filepaths_with_empty_note_by_project_id_n_filepaths_in(self, project_id, fpaths):
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT filepath FROM note WHERE project_id = ? and note = '' and filepath IN {}".format(tuple(fpaths)), 
-                       (project_id,))
+    # def select_filepaths_with_empty_note_by_project_id_n_filepaths_in(self, project_id, fpaths):
+    #     cursor = self.conn.cursor()
+    #     cursor.execute("SELECT filepath FROM note WHERE project_id = ? and note = '' and filepath IN {}".format(tuple(fpaths)), 
+    #                    (project_id, ))
         
-        rows = cursor.fetchall()
-        self.conn.commit()
+    #     rows = cursor.fetchall()
+    #     self.conn.commit()
 
-        return rows
+    #     return rows
     
 
-    def select_filepaths_by_project_id_n_filepaths_in(self, project_id, fpaths):
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT filepath FROM note WHERE project_id = ? and filepath IN {}".format(tuple(fpaths)), 
-                       (project_id,))
+    # def select_filepaths_by_project_id_n_filepaths_in(self, project_id, fpaths):
+    #     cursor = self.conn.cursor()
+    #     cursor.execute("SELECT filepath FROM note WHERE project_id = ? and filepath IN {}".format(tuple(fpaths)), 
+    #                    (project_id,))
         
-        rows = cursor.fetchall()
-        self.conn.commit()
+    #     rows = cursor.fetchall()
+    #     self.conn.commit()
 
-        return rows
+    #     return rows
 
 
-    def select_notes_by_filepath_like_n_project_id(
-            self, 
-            fpath_like, 
-            project_id
-            ):
-        cursor = self.conn.cursor()
-        cursor.execute(f"SELECT note FROM note WHERE filepath LIKE ? AND project_id = ?", 
-                    (fpath_like, project_id, ))
+    # def select_notes_by_filepath_like_n_project_id(
+    #         self, 
+    #         fpath_like, 
+    #         project_id
+    #         ):
+    #     cursor = self.conn.cursor()
+    #     cursor.execute(f"SELECT note FROM note WHERE filepath LIKE ? AND project_id = ?", 
+    #                 (fpath_like, project_id, ))
 
-        row = cursor.fetchall()
-        self.conn.commit()
+    #     row = cursor.fetchall()
+    #     self.conn.commit()
 
-        return row
+    #     return row
     
 
     def select_note_by_filepath_n_project_id(
@@ -131,7 +132,7 @@ class core_helper:
         self.conn.commit()
 
         return row
-
+    
 
     def search_filepaths_by_project_id(
             self, 

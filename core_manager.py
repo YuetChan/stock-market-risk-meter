@@ -21,48 +21,51 @@ class core_manager:
         self.core_helper = core_helper
 
         self._init_intra_connect()
-        
+
         self._open_note(self.file_tree.root_dir, True)
 
 
     def _init_intra_connect(self):
         self.file_tree.file_clicked.connect(
-            lambda data : self._open_note(data['file_path'], data['is_dir']))
+            lambda data : self._open_note(data['file_path'], data['is_dir'])
+            )
         
         self.text_edit_area.text_changed.connect(
-            lambda data : self._auto_save_note(data))
+            lambda data : self._auto_save_note(data)
+            )
 
 
     def _open_note(self, fpath, is_dir):
-        text_edit_area_label = self.text_edit_area_label
+        self.text_edit_area_label.setText(
+            f'Directory :   {fpath}' if is_dir else f'File :   {fpath}'
+            )
 
-        text_edit_area = self.text_edit_area
-        text_edit_tool_bar = self.text_edit_tool_bar
-
-        note = self.core_helper.select_note_by_filepath_n_project_id(fpath, self.project_id)
-
-        text_edit_area_label.setText(f'Directory :   {fpath}' if is_dir else f'File :   {fpath}' )
+        note = self.core_helper.select_note_by_filepath_n_project_id(
+            fpath, 
+            self.project_id
+            )
 
         if note != None:
-            text_edit_area.setReadOnly(False)
-            text_edit_area.setStyleSheet("background-color: #FFFFFF;")
+            self.text_edit_area.setReadOnly(False)
+            self.text_edit_area.setStyleSheet("background-color: #FFFFFF;")
 
-            text_edit_area.setHtml(note[0])
+            self.text_edit_area.setHtml(note[0])
+            self.text_edit_tool_bar.default_all_actions()
 
         else:
-            text_edit_area.setHtml('')
+            self.text_edit_area.setHtml('')
 
             if is_dir:
-                text_edit_area.setReadOnly(True)
-                text_edit_area.setStyleSheet("background-color: #f0f0f0;")
+                self.text_edit_area.setReadOnly(True)
+                self.text_edit_area.setStyleSheet("background-color: #f0f0f0;")
 
-                text_edit_tool_bar.disable_all_actions()
+                self.text_edit_tool_bar.disable_all_actions()
 
             else:
-                text_edit_area.setReadOnly(False)
-                text_edit_area.setStyleSheet("background-color: #FFFFFF;")  
+                self.text_edit_area.setReadOnly(False)
+                self.text_edit_area.setStyleSheet("background-color: #FFFFFF;")  
 
-                text_edit_tool_bar.default_all_actions()
+                self.text_edit_tool_bar.default_all_actions()
 
 
         return

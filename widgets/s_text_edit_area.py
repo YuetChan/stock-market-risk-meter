@@ -74,8 +74,8 @@ class s_text_edit_area(QTextEdit):
 
 
         elif self._is_copy_key(event) or self._is_cut_key(event):
-            # copy / cut the htnl to clipbrd first
-            # by default, qt makes small adjustment to clipbrd html 
+            # Copy / cut the htnl to clipbrd first
+            # By default, qt makes small adjustment to clipbrd html 
             super().keyPressEvent(event)
 
             cursor = self.textCursor()
@@ -123,6 +123,7 @@ class s_text_edit_area(QTextEdit):
         block_format = cursor.blockFormat()
 
         font = cursor.charFormat().font()
+        alignment_int = int(block_format.alignment())
 
         action_map = self.tool_bar.action_map
 
@@ -132,9 +133,9 @@ class s_text_edit_area(QTextEdit):
 
         action_map['bullet_action'].setChecked(True if cursor.currentList() else False)
 
-        action_map['left_align_action'].setChecked(True if block_format.alignment() == Qt.AlignLeft else False)
-        action_map['center_align_action'].setChecked(True if block_format.alignment() == Qt.AlignCenter else False)
-        action_map['right_align_action'].setChecked(True if block_format.alignment() == Qt.AlignRight else False)
+        action_map['left_align_action'].setChecked(True if alignment_int & Qt.AlignLeft else False)
+        action_map['center_align_action'].setChecked(True if alignment_int & Qt.AlignCenter else False)
+        action_map['right_align_action'].setChecked(True if alignment_int & Qt.AlignRight else False)
 
 
     def _on_text_changed(self):
@@ -272,8 +273,8 @@ class s_text_edit_area(QTextEdit):
         return  self.qt_clipbrd_cache.get(key) != None
 
 
-    # remove <!--StartFragment--> and <!--EndFragment--> 
-    # becuase they are sometimes inserted inproperly by qt
+    # Remove <!--StartFragment--> and <!--EndFragment--> 
+    # Becuase they are sometimes inserted inproperly by qt
     def _strip_qt_start_and_end_segments_tags(
             self, 
             html

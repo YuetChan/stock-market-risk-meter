@@ -5,6 +5,14 @@ class s_project_config_dialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         
+        self._init_ui()
+        
+
+    def get_project_name(self):
+        return self.line_edit.text()
+
+
+    def _init_ui(self):
         self.setWindowTitle('New Project')
         
         self.label = QLabel('Enter project name:')
@@ -19,12 +27,9 @@ class s_project_config_dialog(QDialog):
         layout = QVBoxLayout()
 
         layout.addWidget(self.label)
-        layout.addWidget(self.line_edit)
         
+        layout.addWidget(self.line_edit)
         layout.addWidget(self.button_box)
         
         self.setLayout(layout)
-        
 
-    def get_project_name(self):
-        return self.line_edit.text()

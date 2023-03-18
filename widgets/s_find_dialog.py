@@ -14,29 +14,8 @@ class s_find_dialog(QDialog):
         self.match_count = 0
         self.init_pos = 0
 
-        self.setWindowTitle("Find")
-        
-        layout = QVBoxLayout(self)
+        self._init_ui()
 
-        layout.addWidget(QLabel("Search for:"))
-
-        self.search_field = QLineEdit()
-
-        layout.addWidget(self.search_field)
-        
-        find_button = QPushButton("Find Next")
-
-        find_button.clicked.connect(self.search_text)
-        layout.addWidget(find_button)
-        
-        cancel_button = QPushButton("Cancel")
-
-        cancel_button.clicked.connect(self.reject)
-        layout.addWidget(cancel_button)
-    
-        self.match_counts_label = QLabel("Match count:")
-        layout.addWidget(self.match_counts_label)
-        
 
     def search_text(self):
         cursor = self.text_edit_area.textCursor()
@@ -70,7 +49,32 @@ class s_find_dialog(QDialog):
                 self.text_edit_area.highlight_selection(cursor, start_pos, end_pos)
                 self.init_pos = end_pos
 
-            
+
+    def _init_ui(self):
+        self.setWindowTitle("Find")
+        
+        layout = QVBoxLayout(self)
+
+        layout.addWidget(QLabel("Search for:"))
+
+        self.search_field = QLineEdit()
+
+        layout.addWidget(self.search_field)
+        
+        find_button = QPushButton("Find Next")
+
+        find_button.clicked.connect(self.search_text)
+        layout.addWidget(find_button)
+        
+        cancel_button = QPushButton("Cancel")
+
+        cancel_button.clicked.connect(self.reject)
+        layout.addWidget(cancel_button)
+    
+        self.match_counts_label = QLabel("Match count:")
+        layout.addWidget(self.match_counts_label)        
+
+
     def _find_next_match(
             self, 
             pos, 

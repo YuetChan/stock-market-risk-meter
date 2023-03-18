@@ -10,7 +10,6 @@ class s_file_tree(QTreeView):
 
     def __init__(
             self, 
-            id, 
             label, 
             root_dir, 
             hl_fpaths,
@@ -20,23 +19,22 @@ class s_file_tree(QTreeView):
         super(s_file_tree, self).__init__(parent)
 
         self.selected_fpath = None
+
         self.is_dir_selected = None
 
         self.selected_item = None
-
-        self.id = id
 
         self.root_dir = root_dir
 
         self.hl_fpaths = hl_fpaths
         self.hl_decorator = hl_decorator
 
-        self.default_decorator = lambda item: item.setForeground(QBrush(QColor('black')))
-        
         self.setModel(self._populate(self.root_dir, label))
         self.expand(self.model().index(0, 0))
 
-        self.clicked.connect(self._on_treeview_clicked)
+        self.default_decorator = lambda item: item.setForeground(QBrush(QColor('black')))
+        
+        self.clicked.connect(self._on_file_clicked)
 
 
     def decorate_selected_file(self):
@@ -80,18 +78,15 @@ class s_file_tree(QTreeView):
         return model
 
 
-    # Recursive impl
     def _add_files(
             self, 
             parent, 
             path,
             model
             ):
-        # Loop through the items in the directory
         for fname in os.listdir(path):
             fpath = os.path.join(path, fname)
 
-            # If item is a file and in file paths
             if not os.path.isdir(fpath):
                 item = QStandardItem(fname)
                 
@@ -104,7 +99,6 @@ class s_file_tree(QTreeView):
                 parent.appendRow(item)
 
 
-            # If the item is a directory, recursively add its items
             if os.path.isdir(fpath):
                 item = QStandardItem(fname)
 
@@ -114,7 +108,7 @@ class s_file_tree(QTreeView):
                 self._add_files(item, fpath, model)
 
 
-    def _on_treeview_clicked(
+    def _on_file_clicked(
             self, 
             index
             ):

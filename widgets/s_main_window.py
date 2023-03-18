@@ -44,45 +44,37 @@ class s_main_window(QMainWindow):
         self.default_config_fname = 's_config.json'
 
 
-    def create_new_project(self):
-        # clean up previous widgets
+    def new_project(self):
+        # Clean up previous widgets
         self._clean_up()
 
-        self.c_config['root_dir'] = QFileDialog.getExistingDirectory(            
+        self.c_config['root_dir'] = QFileDialog().getExistingDirectory(            
             None,
             'Select a folder:',
             '',
-            QFileDialog.ShowDirsOnly
+            QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
             )
 
         if os.path.exists(os.path.join(self.c_config['root_dir'], self.default_config_fname)):
-            QMessageBox.critical(
-                None, 
-                'Error', 
-                'The selected directory already contain a configuration file.'
-                )
+            self._show_config_file_existed_msg()
                 
         else:
             if self._prompt_project_config():
                 self._init_core_ui()
 
             else:
-                QMessageBox.critical(
-                    None, 
-                    'Error', 
-                    'Failed to create a configuration file.'
-                    )
+                self._show_config_file_create_failed_msg()
                 
 
     def open_project(self):
-        # clean up previous widgets
+        # Clean up previous widgets
         self._clean_up()
 
-        self.c_config['root_dir'] = QFileDialog.getExistingDirectory(
+        self.c_config['root_dir'] = QFileDialog().getExistingDirectory(
             None,
             'Select a folder:',
             '',
-            QFileDialog.ShowDirsOnly
+            QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
         )
 
         if os.path.exists(os.path.join(self.c_config['root_dir'], self.default_config_fname)):
@@ -95,19 +87,11 @@ class s_main_window(QMainWindow):
                 self._init_core_ui()
 
             else:
-                QMessageBox.critical(
-                    None, 
-                    'Error', 
-                    'The selected directory does not contain a valid configuration.'
-                    )
+                self._show_config_file_not_valid_msg()
   
 
         else:
-            QMessageBox.critical(
-                None, 
-                'Error', 
-                'The selected directory does not contain a configuration file.'
-                )
+            self._show_config_file_missing_msg()
 
 
     def _init_dialogs_ui(self):
@@ -134,7 +118,7 @@ class s_main_window(QMainWindow):
     def _init_new_project_action(self):
         action = QAction('New Project', self)
 
-        action.triggered.connect(self.create_new_project)
+        action.triggered.connect(self.new_project)
         self.file_menu.addAction(action)
 
 
@@ -221,7 +205,6 @@ class s_main_window(QMainWindow):
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
         self.file_tree = s_file_tree(
-            self.c_config['project_id'], 
             self.c_config['project_name'], 
             self.c_config['root_dir'], 
             hl_fpaths,
@@ -256,8 +239,6 @@ class s_main_window(QMainWindow):
         self.text_edit_area = s_text_edit_area()
 
         self.text_edit_tool_bar = s_text_edit_tool_bar(self.text_edit_area)
-
-        self.text_edit_tool_bar.set_main_window(self)
 
 
     def _init_left_panel(self):
@@ -294,7 +275,46 @@ class s_main_window(QMainWindow):
         self.right_panel.setLayout(v_box)
     
 
+    def _show_config_file_existed_msg(self):
+        QMessageBox.critical(
+            None, 
+            'Error', 
+            'The selected directory already contain a configuration file.'
+            )
+
+
+    def _show_config_file_create_failed_msg(self):
+        QMessageBox.critical(
+            None, 
+            'Error', 
+            'Failed to create a configuration file.'
+            )
+
+
+    def _show_config_file_missing_msg(self):
+        QMessageBox.critical(
+            None, 
+            'Error', 
+            'The selected directory does not contain a configuration file.'
+            )
+        
+    
+    def _show_config_file_not_valid_msg(self):
+        QMessageBox.critical(
+            None, 
+            'Error', 
+            'The selected directory does not contain a valid configuration.'
+            )
+        
+
     def _clean_up(self):
+        # Central splitter contains all widgets. 
+        # Deleting central splitter would delete all widgets
         if self.central_splitter != None:
             self.central_splitter.deleteLater()
 
+            # deleteLater() doesnt remove the reference. 
+            # This removes reference manually
+            self.central_splitter = None
+
+            

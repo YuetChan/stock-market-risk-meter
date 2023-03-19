@@ -4,12 +4,12 @@ class s_find_dialog(QDialog):
 
     def __init__(
             self, 
-            text_edit_area,
+            text_area,
             parent=None
             ):
         super(s_find_dialog, self).__init__(parent)
 
-        self.text_edit_area = text_edit_area
+        self.text_area = text_area
 
         self.match_count = 0
         self.init_pos = 0
@@ -18,7 +18,7 @@ class s_find_dialog(QDialog):
 
 
     def search_text(self):
-        cursor = self.text_edit_area.textCursor()
+        cursor = self.text_area.textCursor()
 
         # if there is a selection, clear it before searching
         if cursor.hasSelection():
@@ -27,26 +27,26 @@ class s_find_dialog(QDialog):
 
         search_text = self.search_field.text()
 
-        self.match_counts_label.setText(f'Match count: {self._get_match_count(search_text)}')
-        match = self._find_next_match(self.init_pos, search_text)
+        self.match_counts_label.setText(f'Match count: {self.text_area.get_match_count(search_text)}')
+        match = self.text_area.find_next_match(self.init_pos, search_text)
 
         if match != None:
             start_pos = match.position() - len(search_text)
             end_pos = match.position()
 
-            self.text_edit_area.highlight_selection(cursor, start_pos, end_pos)
+            self.text_area.highlight_selection(cursor, start_pos, end_pos)
             self.init_pos = end_pos
 
         else:
             self.init_pos = 0
 
-            match = self._find_next_match(self.init_pos, search_text)
+            match = self.text_area.find_next_match(self.init_pos, search_text)
  
             if match != None:
                 start_pos = match.position() - len(search_text)
                 end_pos = match.position()
 
-                self.text_edit_area.highlight_selection(cursor, start_pos, end_pos)
+                self.text_area.highlight_selection(cursor, start_pos, end_pos)
                 self.init_pos = end_pos
 
 
@@ -74,39 +74,4 @@ class s_find_dialog(QDialog):
         self.match_counts_label = QLabel("Match count:")
         layout.addWidget(self.match_counts_label)        
 
-
-    def _find_next_match(
-            self, 
-            pos, 
-            search_text
-            ):
-        match = self.text_edit_area.document().find(search_text, pos)
-
-        if not match.isNull():
-            return match
-
-        else:
-            return None    
-
-
-    def _get_match_count(
-            self, 
-            search_text
-            ):
-        match_count = 0
-        init_pos = 0
-
-        while True:
-            match = self.text_edit_area.document().find(search_text, init_pos)
-
-            if match.isNull():
-                break
-
-
-            init_pos = match.position()
-            match_count += 1
-
-
-        return match_count
-            
     

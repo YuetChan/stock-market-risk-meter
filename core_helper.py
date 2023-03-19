@@ -54,23 +54,6 @@ class core_helper:
         
         return num_rows_affected
 
-
-    # def update_note_by_filepath_n_project_id(
-    #         self, 
-    #         note, 
-    #         fpath, 
-    #         project_id
-    #         ):
-    #     cursor = self.conn.cursor()
-    #     cursor.execute("UPDATE note set note = ? WHERE filepath = ? AND project_id = ?", 
-    #                (note, fpath, project_id, ))
-        
-    #     num_rows_affected = cursor.rowcount
-    #     self.conn.commit()
-        
-    #     return num_rows_affected
-
-
     def select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_in(self, project_id, fpaths):
         cursor = self.conn.cursor()
         cursor.execute("SELECT filepath FROM note WHERE project_id = ? and plain_text_note != '' and filepath IN {}".format(tuple(fpaths)), 
@@ -82,42 +65,16 @@ class core_helper:
         return rows
 
 
-    # def select_filepaths_with_empty_note_by_project_id_n_filepaths_in(self, project_id, fpaths):
-    #     cursor = self.conn.cursor()
-    #     cursor.execute("SELECT filepath FROM note WHERE project_id = ? and note = '' and filepath IN {}".format(tuple(fpaths)), 
-    #                    (project_id, ))
+    def select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_not_in(self, project_id, fpaths):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT filepath FROM note WHERE project_id = ? and plain_text_note != '' and filepath NOT IN {}".format(tuple(fpaths)), 
+                       (project_id, ))
         
-    #     rows = cursor.fetchall()
-    #     self.conn.commit()
+        rows = cursor.fetchall()
+        self.conn.commit()
 
-    #     return rows
-    
+        return rows
 
-    # def select_filepaths_by_project_id_n_filepaths_in(self, project_id, fpaths):
-    #     cursor = self.conn.cursor()
-    #     cursor.execute("SELECT filepath FROM note WHERE project_id = ? and filepath IN {}".format(tuple(fpaths)), 
-    #                    (project_id,))
-        
-    #     rows = cursor.fetchall()
-    #     self.conn.commit()
-
-    #     return rows
-
-
-    # def select_notes_by_filepath_like_n_project_id(
-    #         self, 
-    #         fpath_like, 
-    #         project_id
-    #         ):
-    #     cursor = self.conn.cursor()
-    #     cursor.execute(f"SELECT note FROM note WHERE filepath LIKE ? AND project_id = ?", 
-    #                 (fpath_like, project_id, ))
-
-    #     row = cursor.fetchall()
-    #     self.conn.commit()
-
-    #     return row
-    
 
     def select_note_by_filepath_n_project_id(
             self, 

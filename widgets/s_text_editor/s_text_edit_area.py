@@ -42,6 +42,41 @@ class s_text_edit_area(QTextEdit):
         self.setTextCursor(cursor)
 
 
+    def find_next_match(
+            self, 
+            pos, 
+            search_text
+            ):
+        match = self.document().find(search_text, pos)
+
+        if not match.isNull():
+            return match
+
+        else:
+            return None   
+        
+
+    def get_match_count(
+            self, 
+            search_text
+            ):
+        match_count = 0
+        init_pos = 0
+
+        while True:
+            match = self.document().find(search_text, init_pos)
+
+            if match.isNull():
+                break
+
+
+            init_pos = match.position()
+            match_count += 1
+
+
+        return match_count
+
+
     def keyPressEvent(
             self, 
             event: QKeyEvent
@@ -120,10 +155,10 @@ class s_text_edit_area(QTextEdit):
     def _on_cursor_position_changed(self):
         cursor = self.textCursor()
 
-        block_format = cursor.blockFormat()
+        block_fmt = cursor.blockFormat()
 
         font = cursor.charFormat().font()
-        alignment_int = int(block_format.alignment())
+        alignment_int = int(block_fmt.alignment())
 
         action_map = self.tool_bar.action_map
 
@@ -225,20 +260,20 @@ class s_text_edit_area(QTextEdit):
             self, 
             cursor
             ):
-        list_format = QTextListFormat()
-        list_format.setStyle(QTextListFormat.ListDisc)
+        list_fmt = QTextListFormat()
 
-        cursor.createList(list_format)
+        list_fmt.setStyle(QTextListFormat.ListDisc)
+        cursor.createList(list_fmt)
 
 
     def _reset_indent(
             self, 
             cursor
             ):
-        block_format = cursor.blockFormat()
-        block_format.setIndent(0)
+        block_fmt = cursor.blockFormat()
+        block_fmt.setIndent(0)
 
-        cursor.setBlockFormat(block_format)
+        cursor.setBlockFormat(block_fmt)
            
         self.setTextCursor(cursor)
 
@@ -291,15 +326,15 @@ class s_text_edit_area(QTextEdit):
             ):
         soup = BeautifulSoup(html, 'html.parser')
 
-        # extract first p tag to remove newline char at the start of line
         first_p = soup.find('p')
 
-        if first_p != None:
-            first_p.extract()
-            return str(soup)
+        if first_p == None:
+            return html
         
 
-        return html
+        first_p.extract()
+        
+        return str(soup)
 
 
     def _get_hash_of_str(
@@ -309,7 +344,6 @@ class s_text_edit_area(QTextEdit):
         hash_object = hashlib.sha256()
 
         hash_object.update(_str.encode())
-
         hex_digest = hash_object.hexdigest()
 
         return str(int(hex_digest, 16))

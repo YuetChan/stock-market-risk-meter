@@ -187,8 +187,8 @@ class s_text_edit_tool_bar(QToolBar):
             ):
         cursor = self.text_edit_area.textCursor()
 
-        char_format = cursor.charFormat()
-        font = char_format.font()
+        char_fmt = cursor.charFormat()
+        font = char_fmt.font()
 
         if style == 'bold':
             font.setWeight(QFont.Bold if checked else QFont.Normal)
@@ -200,8 +200,8 @@ class s_text_edit_tool_bar(QToolBar):
             font.setUnderline(checked)
 
 
-        char_format.setFont(font)
-        self.text_edit_area.setCurrentCharFormat(char_format)
+        char_fmt.setFont(font)
+        self.text_edit_area.setCurrentCharFormat(char_fmt)
 
 
     def _set_text_alignment(
@@ -234,13 +234,13 @@ class s_text_edit_tool_bar(QToolBar):
         cursor = self.text_edit_area.textCursor()
 
         if checked:
-            list_format = QTextListFormat()
+            list_fmt = QTextListFormat()
 
-            list_format.setStyle(QTextListFormat.ListDisc)
+            list_fmt.setStyle(QTextListFormat.ListDisc)
 
             if len(cursor.block().text()) == 0:
                 cursor.movePosition(QTextCursor.StartOfBlock)
 
 
-            cursor.createList(list_format)
+            cursor.createList(list_fmt)
 

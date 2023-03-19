@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QDialogButtonBox, QVBoxLayout
 
-class s_project_config_dialog(QDialog):
+class s_config_dialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -8,8 +8,12 @@ class s_project_config_dialog(QDialog):
         self._init_ui()
         
 
-    def get_project_name(self):
-        return self.line_edit.text()
+    def get_config(self): 
+        config = {
+            'project_name': self.line_edit.text()
+        }
+        
+        return config
 
 
     def _init_ui(self):

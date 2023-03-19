@@ -2,8 +2,8 @@ import os
 import uuid
 import json
 
-from PyQt5.QtWidgets import QMainWindow, QAction, QFileDialog, QMenu, QSplitter, QVBoxLayout, QWidget, QLabel, QMessageBox, QDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMainWindow, QAction, QFileDialog, QMenu, QSplitter, QLabel, QMessageBox, QDialog
+from PyQt5.QtCore import Qt, QVariant
 from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor, QIcon
 
 from config_reader import config_reader
@@ -13,12 +13,13 @@ from core_manager import core_manager
 from db_connector import db_connector
 from fs_helper import fs_helper
 
-from widgets.s_file_search_bar import s_file_search_bar
-from widgets.s_project_config_dialog import s_project_config_dialog
-from widgets.s_text_edit_tool_bar import s_text_edit_tool_bar
-from widgets.s_text_edit_area import s_text_edit_area
+from widgets.s_config_dialog import s_config_dialog
+from widgets.s_search_bar import s_file_search_bar
+from widgets.s_text_editor.s_text_editor import s_text_editor
 from widgets.s_file_tree import s_file_tree
 from widgets.s_file_list import s_file_list
+
+from widgets.s_file_searcher.s_file_searcher import s_file_searcher
 
 class s_main_window(QMainWindow):
     
@@ -31,10 +32,16 @@ class s_main_window(QMainWindow):
         self._init_dialogs_ui()
         self._init_actions_ui()
         
+        self.hl_fpath = []
+        self.dangling_fpath = []
+
         self.left_panel = None
         self.right_panel = None
 
         self.central_splitter = None
+
+        self.file_tree = None
+        self.text_editor = None
 
         self.c_helper = core_helper(db_connector('./resources/test.db').get_connection())
 
@@ -45,9 +52,6 @@ class s_main_window(QMainWindow):
 
 
     def new_project(self):
-        # Clean up previous widgets
-        self._clean_up()
-
         self.c_config['root_dir'] = QFileDialog().getExistingDirectory(            
             None,
             'Select a folder:',
@@ -55,35 +59,46 @@ class s_main_window(QMainWindow):
             QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
             )
 
+        if self.c_config['root_dir'] == '':
+            return
+        
+
         if os.path.exists(os.path.join(self.c_config['root_dir'], self.default_config_fname)):
             self._show_config_file_existed_msg()
                 
-        else:
-            if self._prompt_project_config():
-                self._init_core_ui()
+        elif self._prompt_project_config():
+             # Clean up previous widgets before init new widgets
+            self._clean_up()
+            self._init_core_ui()
 
-            else:
-                self._show_config_file_create_failed_msg()
+        else:
+            self._show_config_file_create_failed_msg()
                 
 
     def open_project(self):
-        # Clean up previous widgets
-        self._clean_up()
+        fpath = QFileDialog().getOpenFileName(
+            None, 
+            "Open s_config.json", 
+            "", 
+            "JSON Files (*.json);;All Files (*)", 
+            options= QFileDialog.Options() | QFileDialog.DontUseNativeDialog
+            )[0]
+        
+        if fpath == '':
+            return
+            
 
-        self.c_config['root_dir'] = QFileDialog().getExistingDirectory(
-            None,
-            'Select a folder:',
-            '',
-            QFileDialog.ShowDirsOnly | QFileDialog.DontUseNativeDialog
-        )
-
-        if os.path.exists(os.path.join(self.c_config['root_dir'], self.default_config_fname)):
-            c_reader = config_reader(self.default_config_fname)
+        if  os.path.basename(fpath) == self.default_config_fname:
+            c_reader = config_reader(fpath)
 
             if c_reader.is_valid:
                 self.c_config['project_id'] = c_reader.get_project_id()
                 self.c_config['project_name'] = c_reader.get_project_name()
+
+                self.c_config['root_dir'] = os.path.dirname(fpath)
             
+                # Clean up previous widgets before init new widgets
+                self._clean_up()
                 self._init_core_ui()
 
             else:
@@ -95,7 +110,7 @@ class s_main_window(QMainWindow):
 
 
     def _init_dialogs_ui(self):
-        self.dialog = s_project_config_dialog()
+        self.dialog = s_config_dialog()
 
 
     def _init_actions_ui(self):
@@ -140,7 +155,7 @@ class s_main_window(QMainWindow):
 
     def _prompt_project_config(self):
         if self.dialog.exec_() == QDialog.Accepted:
-            self.c_config['project_name'] = self.dialog.get_project_name()
+            self.c_config['project_name'] = self.dialog.get_config()['project_name']
             self.c_config['project_id'] = str(uuid.uuid4())
 
             try:    
@@ -163,27 +178,16 @@ class s_main_window(QMainWindow):
         
 
     def _init_core_ui(self):
-        self._init_file_tree()
-        self._init_file_list()
-
-        self._init_text_edit()
-
         self._init_left_panel()
         self._init_right_panel()
 
-        self.central_splitter = QSplitter()
-    
-        self.central_splitter.addWidget(self.left_panel)
-        self.central_splitter.addWidget(self.right_panel)
+        self._init_central_widget()
 
-        self.setCentralWidget(self.central_splitter)
-        
         self.c_manager = core_manager(
             self.c_config['project_id'], 
             self.file_tree, 
-            self.text_edit_area_label, 
-            self.text_edit_area, 
-            self.text_edit_tool_bar, 
+            self.file_searcher,
+            self.text_editor,
             self.c_helper
             )
 
@@ -204,76 +208,65 @@ class s_main_window(QMainWindow):
 
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
-        self.file_tree = s_file_tree(
-            self.c_config['project_name'], 
-            self.c_config['root_dir'], 
-            hl_fpaths,
-            hl_decorator)
-    
+        self.file_tree = s_file_tree(self.c_config['root_dir'], hl_fpaths, hl_decorator)
+        
+        model = self._populate_file_tree_model(self.c_config['root_dir'], self.c_config['project_name'])
+
+        self.file_tree.setModel(model)
         self.file_tree.setMaximumWidth(300)
 
 
-    def _init_file_list(self):
-        list_model = QStandardItemModel()
+    def _init_file_searcher(self):
+        all_fpaths = fs_helper.get_all_filepaths(self.c_config['root_dir'])
 
-        item1 = QStandardItem('Item 1')
-        item2 = QStandardItem('Item 2')
-        item3 = QStandardItem('Item 3')
+        fpath_rows = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_not_in(
+            self.c_config['project_id'], 
+            all_fpaths
+            )
 
-        list_model.appendRow(item1)
-        list_model.appendRow(item2)
-        list_model.appendRow(item3)
+        model = QStandardItemModel()
 
-        self.file_list =  s_file_list(list_model)
+        for row in fpath_rows:
+            item = QStandardItem(row[0])
 
-        self.search_bar_title = QLabel('Dangling Notes')
+            model.appendRow(item)
+
+
+        self.search_title = QLabel('Dangling Notes')
 
         self.search_bar = s_file_search_bar(self)
 
-        self.search_bar.set_file_list(self.file_list)
+        self.file_list = s_file_list(model)
 
-
-    def _init_text_edit(self):
-        self.text_edit_area_label = QLabel('')
-
-        self.text_edit_area = s_text_edit_area()
-
-        self.text_edit_tool_bar = s_text_edit_tool_bar(self.text_edit_area)
+        self.file_searcher = s_file_searcher(self.search_title, self.search_bar, self.file_list)
 
 
     def _init_left_panel(self):
-        v_box = QVBoxLayout()
-
-        v_box.addWidget(self.search_bar_title)
-        v_box.addWidget(self.search_bar)
-
-        v_box.addWidget(self.file_list)
-
-        file_list_widget = QWidget()
-
-        file_list_widget.setLayout(v_box)
-
+        self._init_file_tree()
+        self._init_file_searcher()
+    
         self.left_panel = QSplitter()
 
         self.left_panel.addWidget(self.file_tree)
-        self.left_panel.addWidget(file_list_widget)
+        self.left_panel.addWidget(self.file_searcher)
 
         self.left_panel.setOrientation(Qt.Vertical)  
         self.left_panel.setSizes([600, 300])
-
+    
 
     def _init_right_panel(self):
-        v_box = QVBoxLayout()
+        self.text_editor = s_text_editor()
+        self.right_panel = self.text_editor
 
-        v_box.addWidget(self.text_edit_area_label)
 
-        v_box.addWidget(self.text_edit_tool_bar)
-        v_box.addWidget(self.text_edit_area)
+    def _init_central_widget(self):
+        self.central_splitter = QSplitter()
 
-        self.right_panel = QWidget()
+        self.central_splitter.addWidget(self.left_panel)
+        self.central_splitter.addWidget(self.right_panel)
 
-        self.right_panel.setLayout(v_box)
-    
+        self.setCentralWidget(self.central_splitter)
+        
 
     def _show_config_file_existed_msg(self):
         QMessageBox.critical(
@@ -318,3 +311,46 @@ class s_main_window(QMainWindow):
             self.central_splitter = None
 
             
+    def _populate_file_tree_model(
+            self, 
+            root_dir,
+            label
+            ):
+        root_item = QStandardItem(root_dir)
+
+        root_item.setData(QVariant([root_dir, True]), Qt.UserRole)
+
+        model = QStandardItemModel()
+
+        model.setHorizontalHeaderLabels([label])
+        model.appendRow(root_item)
+
+        self._add_files(root_item, root_dir, model)
+
+        return model
+
+
+    def _add_files(
+            self, 
+            parent, 
+            path,
+            model
+            ):
+        for fname in os.listdir(path):
+            fpath = os.path.join(path, fname)
+
+            if not os.path.isdir(fpath):
+                item = QStandardItem(fname)
+                
+                item.setData(QVariant([fpath, False]), Qt.UserRole)
+                parent.appendRow(item)
+
+
+            if os.path.isdir(fpath):
+                item = QStandardItem(fname)
+
+                item.setData(QVariant([fpath, True]), Qt.UserRole)
+                parent.appendRow(item)
+
+                self._add_files(item, fpath, model)
+

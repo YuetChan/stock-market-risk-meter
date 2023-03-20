@@ -1,6 +1,6 @@
 import Levenshtein
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel
+from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
 class levenshtein_sort_proxy_model(QSortFilterProxyModel):
@@ -45,6 +45,23 @@ class s_file_searcher(QWidget):
         self.selected_fpath = self.file_list.selected_fpath
 
         self._init_ui()
+
+
+    def get_file_count(self):
+        return self.file_list.model().rowCount()
+
+
+    def select_first_file(self):
+        self.file_list.clicked.emit(self.file_list.model().index(0, 0, QModelIndex()))
+
+
+    def has_selection(self):
+        return self.file_list.selectionModel().hasSelection()
+
+
+    def remove_selected_file(self):
+        idx = self.file_list.currentIndex()
+        self.file_list.model().removeRow(idx.row())
 
 
     def clear_selection(self):

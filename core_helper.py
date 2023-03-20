@@ -82,7 +82,7 @@ class core_helper:
             project_id
             ):
         cursor = self.conn.cursor()
-        cursor.execute(f"SELECT note FROM note WHERE filepath = ? AND project_id = ?", 
+        cursor.execute(f"SELECT note, plain_text_note FROM note WHERE filepath = ? AND project_id = ?", 
                     (fpath, project_id, ))
 
         row = cursor.fetchone()

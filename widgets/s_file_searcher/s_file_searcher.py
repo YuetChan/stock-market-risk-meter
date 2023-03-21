@@ -31,18 +31,13 @@ class s_file_searcher(QWidget):
         self.search_title = search_title
         
         self.search_bar = search_bar
-        self.search_bar.connect_text_changed(lambda text: model.setFilterRegExp(text))
-        
         self.file_list = file_list
 
-        model = levenshtein_sort_proxy_model()
-
-        model.setSourceModel(self.file_list.src_model)
-        model.setFilterCaseSensitivity(Qt.CaseInsensitive)
-
-        self.file_list.setModel(model)
-
         self.selected_fpath = self.file_list.selected_fpath
+
+        self._init_file_list_sort_model()
+
+        self.search_bar.connect_text_changed(lambda text: self.file_list.model().setFilterRegExp(text))
 
         self._init_ui()
 
@@ -68,11 +63,17 @@ class s_file_searcher(QWidget):
         self.file_list.clearSelection()
 
 
-    def connect_file_clicked(self, l_func):
+    def connect_file_clicked(
+            self, 
+            l_func
+            ):
         self.file_list.file_clicked.connect(lambda idx: self._on_file_clicked(idx, l_func))
 
 
-    def _on_file_clicked(self, idx, l_func):
+    def _on_file_clicked(
+            self, 
+            idx, l_func
+            ):
         self.selected_fpath = self.file_list.selected_fpath
         l_func(idx)
 
@@ -86,4 +87,13 @@ class s_file_searcher(QWidget):
         v_box.addWidget(self.file_list)
 
         self.setLayout(v_box)
+
+
+    def _init_file_list_sort_model(self):
+        model = levenshtein_sort_proxy_model()
+
+        model.setSourceModel(self.file_list.src_model)
+        model.setFilterCaseSensitivity(Qt.CaseInsensitive)
+
+        self.file_list.setModel(model)
     

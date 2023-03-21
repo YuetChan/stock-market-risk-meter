@@ -1,26 +1,29 @@
 from PyQt5.QtWidgets import QDialog, QLabel, QLineEdit, QDialogButtonBox, QVBoxLayout
 
-class s_config_dialog(QDialog):
+class s_single_input_dialog(QDialog):
 
     def __init__(
             self, 
+            input_map,
             parent=None
             ):
         super().__init__(parent)
         
+        self.input_map = input_map
+
         self._init_ui()
         
 
     def get_config(self): 
         return {
-            'project_name': self.line_edit.text()
+            self.input_map['dialog_var']: self.line_edit.text()
         }
 
 
     def _init_ui(self):
-        self.setWindowTitle('New Project')
+        self.setWindowTitle(self.input_map['dialog_title'])
         
-        self.label = QLabel('Enter project name:')
+        self.label = QLabel(self.input_map['dialog_msg'])
 
         self.line_edit = QLineEdit()
         

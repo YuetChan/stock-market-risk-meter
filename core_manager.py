@@ -8,7 +8,7 @@ class core_manager:
             project_id,
             file_tree,
             file_searcher,
-            text_editor,
+            rich_text_editor,
             core_helper
             ):
         self.project_id = project_id
@@ -16,7 +16,7 @@ class core_manager:
         self.file_tree = file_tree
         self.file_searcher = file_searcher
         
-        self.text_editor = text_editor
+        self.rich_text_editor = rich_text_editor
 
         self.core_helper = core_helper
 
@@ -28,15 +28,12 @@ class core_manager:
             lambda data : self._on_file_searcher_file_clicked(data['file_path'])
             )
 
-        self.text_editor.connect_text_changed(
+        self.rich_text_editor.connect_text_changed(
             lambda data : self._auto_save_note(data)
             )
 
         self.file_tree.expand(self.file_tree.model().index(0, 0))
         self.file_tree.clicked.emit(self.file_tree.model().index(0, 0, QModelIndex()))
-
-        self.is_file_tree_focused = True
-        self.is_file_searcher_focused = False
 
         self.auto_delete_msg_box = QMessageBox()
 
@@ -48,24 +45,16 @@ class core_manager:
 
     def _on_file_tree_file_clicked(self, fpath, is_dir):
         self.file_searcher.clear_selection()
-
-        self._default_focus_flags()
-        self.is_file_tree_focused = True
-
         self._open_note(fpath, is_dir)
 
 
     def _on_file_searcher_file_clicked(self, fpath):
         self.file_tree.clearSelection()
-
-        self._default_focus_flags()
-        self.is_file_searcher_focused = True
-
         self._open_note(fpath, False)
 
 
     def _open_note(self, fpath, is_dir):
-        self.text_editor.set_label(f'Directory :  {fpath}' if is_dir else f'File :  {fpath}')
+        self.rich_text_editor.set_label(f'Directory :  {fpath}' if is_dir else f'File :  {fpath}')
 
         note = self.core_helper.select_note_by_filepath_n_project_id(
             fpath, 
@@ -73,25 +62,20 @@ class core_manager:
             )
 
         if note != None and note[1] != '':
-            self.text_editor.set_html(note[0])
-            self.text_editor.default_setting()
+            self.rich_text_editor.set_html(note[0])
+            self.rich_text_editor.set_default_setting()
             
         else:
-            self.text_editor.set_html('')
+            self.rich_text_editor.set_html('')
 
             if is_dir:
-                self.text_editor.set_read_only()
+                self.rich_text_editor.set_read_only()
 
             else:
-                self.text_editor.default_setting()
+                self.rich_text_editor.set_default_setting()
 
 
         return
-
-    
-    def _default_focus_flags(self):
-        self.is_file_tree_focused = False
-        self.is_file_searcher_focused = False
 
 
     def _auto_save_note(self, data):        
@@ -100,41 +84,49 @@ class core_manager:
             self._save_note(self.file_tree.selected_fpath)
 
         elif self.file_searcher.has_selection():
-            self._auto_remove_file_searcher_empty_file()
-            self._save_note(self.file_searcher.selected_fpath)
+            if self.rich_text_editor.to_plain_text() == '':
+                self._auto_remove_n_save_file_searcher_empty_file()
+
+            else:
+                self._save_note(self.file_searcher.selected_fpath)
 
 
     def _auto_highlight_file_tree_file(self):
-        if not self.text_editor.to_plain_text() == '':
+        if self.rich_text_editor.to_plain_text() != '':
             self.file_tree.highlight_selected_file()
 
         else:
             self.file_tree.unhighlight_selected_file()
 
 
-    def _auto_remove_file_searcher_empty_file(self):
-        if self.text_editor.to_plain_text() == '':
-            removed = self._prompt_remove_dialog()
+    def _auto_remove_n_save_file_searcher_empty_file(self):
+        result = self._prompt_placeholder_dialog()
             
-            if removed == QMessageBox.Yes:
-                self.text_editor.set_html(self.auto_delete_placeholder) 
+        if result == QMessageBox.Yes:
+            self.rich_text_editor.set_html(self.auto_delete_placeholder)
+            self._save_note(self.file_searcher.selected_fpath)
+
+        else:
+            self._save_note(self.file_searcher.selected_fpath)
+            self.file_searcher.remove_selected_file()
+
+            if self.file_searcher.get_file_count() > 0:
+                self.file_searcher.select_first_file()
 
             else:
-                self.file_searcher.remove_selected_file()
+                self.file_searcher   
+  
 
-                if self.file_searcher.get_file_count() > 0:
-                    self.file_searcher.select_first_file()     
 
-            
     def _save_note(self, fpath):
         self.core_helper.add_note_by_filepath_n_project_id(
-            self.text_editor.to_html(), 
-            self.text_editor.to_plain_text(),
+            self.rich_text_editor.to_html(), 
+            self.rich_text_editor.to_plain_text(),
             fpath, 
             self.project_id
             )
         
 
-    def _prompt_remove_dialog(self):
+    def _prompt_placeholder_dialog(self):
         return self.auto_delete_msg_box.exec_()
 

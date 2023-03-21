@@ -13,9 +13,9 @@ from core_manager import core_manager
 from db_connector import db_connector
 from fs_helper import fs_helper
 
-from widgets.s_config_dialog import s_config_dialog
+from widgets.s_single_input_dialog import s_single_input_dialog
 from widgets.s_search_bar import s_file_search_bar
-from widgets.s_text_editor.s_text_editor import s_text_editor
+from widgets.s_rich_text_editor.s_rich_text_editor import s_rich_text_editor
 from widgets.s_file_tree import s_file_tree
 from widgets.s_file_list import s_file_list
 
@@ -110,7 +110,11 @@ class s_main_window(QMainWindow):
 
 
     def _init_dialogs_ui(self):
-        self.dialog = s_config_dialog()
+        self.dialog = s_single_input_dialog({
+            'dialog_title': 'New Project',
+            'dialog_var': 'project_name',
+            'dialog_msg': 'Enter a project'
+        })
 
 
     def _init_actions_ui(self):
@@ -131,24 +135,34 @@ class s_main_window(QMainWindow):
 
     
     def _init_new_project_action(self):
-        action = QAction('New Project', self)
+        action = QAction(
+            'New Project', 
+            self
+            )
 
         action.triggered.connect(self.new_project)
         self.file_menu.addAction(action)
 
 
     def _init_open_project_action(self):
-        action = QAction('Open Project', self)
+        action = QAction(
+            'Open Project', 
+            self
+            )
 
         action.triggered.connect(self.open_project)
         self.file_menu.addAction(action)
 
 
     def _init_auto_save_action(self):
-        action = QAction('Auto Save', self)
+        action = QAction(
+            QIcon('./resources/check-solid.svg'), 
+            'Auto Save', 
+            self
+            )
 
         action.setCheckable(False)
-        action.setIcon(QIcon('./resources/check-solid.svg'))
+        action.setIcon()
 
         self.file_menu.addAction(action)
 
@@ -173,7 +187,7 @@ class s_main_window(QMainWindow):
 
 
         else:
-            print("Project config dialog rejected")
+            print("Project input dialog rejected")
             return False
         
 
@@ -255,7 +269,7 @@ class s_main_window(QMainWindow):
     
 
     def _init_right_panel(self):
-        self.text_editor = s_text_editor()
+        self.text_editor = s_rich_text_editor()
         self.right_panel = self.text_editor
 
 
@@ -301,13 +315,11 @@ class s_main_window(QMainWindow):
         
 
     def _clean_up(self):
-        # Central splitter contains all widgets. 
-        # Deleting central splitter would delete all widgets
         if self.central_splitter != None:
             self.central_splitter.deleteLater()
 
-            # deleteLater() doesnt remove the reference. 
-            # This removes reference manually
+            # deleteLater() doesnt remove the reference  
+            # and this removes reference manually
             self.central_splitter = None
 
             

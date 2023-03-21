@@ -11,7 +11,17 @@ class s_file_search_bar(QWidget):
         self._init_ui()
 
 
-    def connect_text_changed(self, l_func):
+    def connect_text_changed(
+            self, 
+            l_func
+            ):
+        self._on_text_changed(l_func)
+
+
+    def _on_text_changed(
+            self, 
+            l_func
+            ):
         self.search_line_edit.textChanged.connect(l_func)
 
 
@@ -26,6 +36,6 @@ class s_file_search_bar(QWidget):
         layout.addWidget(self.search_line_edit)
 
         self.search_line_edit.setPlaceholderText('Search...')
-        
+
         self.setLayout(layout)
 

@@ -2,14 +2,24 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAction, QToolBar
 from PyQt5.QtGui import QFont, QTextListFormat, QIcon, QTextCursor
 
-class s_text_edit_tool_bar(QToolBar):
+# This class provides various text formatting options for a text editing area. 
+
+# The toolbar contains actions to enable/disable bold, italic, and underline formatting, bullet points, and text alignment. 
+# The toolbar is initialized with the _init_actions() method, which creates the actions and adds them to the toolbar. 
+
+# The state of the actions is maintained in the action_map dictionary.
+
+# The toolbar also defines methods to toggle bullet points, disable all actions, default all actions, 
+# check whether the bullet point action is checked, 
+# and set the text style and alignment.
+class s_rich_text_tool_bar(QToolBar):
 
     def __init__(
             self,
             text_edit_area, 
             parent=None
             ):
-        super(s_text_edit_tool_bar, self).__init__(parent)
+        super(s_rich_text_tool_bar, self).__init__(parent)
 
         self.text_edit_area = text_edit_area
         self.text_edit_area.set_tool_bar(self)
@@ -19,11 +29,11 @@ class s_text_edit_tool_bar(QToolBar):
         self._init_actions()
 
 
-    def is_bullet_pt_checked(self):
+    def is_bullet_point_checked(self):
         return self.action_map['bullet_action'].isChecked()
     
 
-    def toggle_bullet_pt(self, checked):
+    def toggle_bullet_point(self, checked):
         self.action_map['bullet_action'].setChecked(checked)
 
 
@@ -58,7 +68,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_bold_action(self):
-        action = QAction(QIcon().fromTheme('format-text-bold'), 'Bold', self)
+        action = QAction(
+            QIcon().fromTheme('format-text-bold'), 
+            'Bold', 
+            self
+            )
         
         action.triggered.connect(
             lambda checked: self._set_text_style('bold', checked)
@@ -72,7 +86,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_italic_action(self):
-        action = QAction(QIcon().fromTheme('format-text-italic'), 'Italic', self)
+        action = QAction(
+            QIcon().fromTheme('format-text-italic'), 
+            'Italic', 
+            self
+            )
         
         action.triggered.connect(
             lambda checked: self._set_text_style('italic', checked))
@@ -85,7 +103,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_underline_action(self):
-        action = QAction(QIcon().fromTheme('format-text-underline'), 'Underline', self)
+        action = QAction(
+            QIcon().fromTheme('format-text-underline'), 
+            'Underline', 
+            self
+            )
         
         action.triggered.connect(
             lambda checked: self._set_text_style('underline', checked)
@@ -99,7 +121,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_bullet_point_action(self):
-        action = QAction(QIcon('./resources/list-solid.svg'), 'Bullet Points', self)
+        action = QAction(
+            QIcon('./resources/list-solid.svg'), 
+            'Bullet Points', 
+            self
+            )
         
         action.triggered.connect(
             lambda checked: self._add_bullet_point(checked)
@@ -113,7 +139,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_left_align(self):
-        action = QAction(QIcon().fromTheme('format-justify-left'), 'Align Left', self)
+        action = QAction(
+            QIcon().fromTheme('format-justify-left'), 
+            'Align Left', 
+            self
+            )
         
         action.triggered.connect(
             lambda: self._set_text_alignment('left')
@@ -129,7 +159,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_center_align(self):
-        action = QAction(QIcon().fromTheme('format-justify-center'), 'Align Center', self)
+        action = QAction(
+            QIcon().fromTheme('format-justify-center'), 
+            'Align Center', 
+            self
+            )
         
         action.triggered.connect(
             lambda: self._set_text_alignment('center')
@@ -143,7 +177,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_right_align(self):   
-        action = QAction(QIcon().fromTheme('format-justify-right'), 'Align Right', self)
+        action = QAction(
+            QIcon().fromTheme('format-justify-right'), 
+            'Align Right', 
+            self
+            )
         
         action.triggered.connect(
             lambda: self._set_text_alignment('right')
@@ -157,7 +195,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_undo_action(self):
-        action = QAction(QIcon('./resources/rotate-left-solid.svg'), 'Undo', self)
+        action = QAction(
+            QIcon('./resources/rotate-left-solid.svg'), 
+            'Undo', 
+            self
+            )
 
         action.triggered.connect(self.text_edit_area.undo)
 
@@ -169,7 +211,11 @@ class s_text_edit_tool_bar(QToolBar):
 
 
     def _init_redo_action(self):
-        action = QAction(QIcon('./resources/rotate-right-solid.svg'), 'Redo', self)
+        action = QAction(
+            QIcon('./resources/rotate-right-solid.svg'), 
+            'Redo', 
+            self
+            )
 
         action.triggered.connect(self.text_edit_area.redo)
         

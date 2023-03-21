@@ -7,7 +7,12 @@ from PyQt5.QtWidgets import QTextEdit, QApplication
 
 from widgets.s_find_dialog import s_find_dialog
 
-class s_text_edit_area(QTextEdit):
+# This class is designed to track key press events 
+# and dynamically update the tool bar based on those events.
+
+# Additionally, it manages clipboard behavior 
+# and provides methods for text highlighting and search functionality
+class s_rich_text_area(QTextEdit):
 
     text_changed = pyqtSignal(dict)
 
@@ -15,7 +20,7 @@ class s_text_edit_area(QTextEdit):
             self, 
             parent=None
             ):
-        super(s_text_edit_area, self).__init__(parent)
+        super(s_rich_text_area, self).__init__(parent)
 
         self.qt_clipbrd_cache = { }
 
@@ -25,9 +30,9 @@ class s_text_edit_area(QTextEdit):
 
     def set_tool_bar(
             self, 
-            tool_bar
+            rich_text_tool_bar
             ):
-        self.tool_bar = tool_bar
+        self.rich_text_tool_bar = rich_text_tool_bar
 
 
     def highlight_selection(
@@ -44,10 +49,10 @@ class s_text_edit_area(QTextEdit):
 
     def find_next_match(
             self, 
-            pos, 
+            start_pos, 
             search_text
             ):
-        match = self.document().find(search_text, pos)
+        match = self.document().find(search_text, start_pos)
 
         if not match.isNull():
             return match
@@ -85,23 +90,23 @@ class s_text_edit_area(QTextEdit):
 
         cursor = self.textCursor()
 
-        tool_bar = self.tool_bar
+        rich_text_tool_bar = self.rich_text_tool_bar
 
         if self._is_delete_key(event):
             if self._is_delete_on_empty_line(cursor) and self._is_list_above(cursor):
                 super().keyPressEvent(event)
 
                 self._create_empty_list(cursor)
-                tool_bar.toggle_bullet_pt(True) 
+                rich_text_tool_bar.toggle_bullet_point(True) 
 
             elif self._is_delete_on_empty_list(cursor):
                 super().keyPressEvent(event)
 
-                was_in_bullet_pt = not self._is_list(cursor) and tool_bar.is_bullet_pt_checked()
+                was_in_bullet_pt = not self._is_list(cursor) and rich_text_tool_bar.is_bullet_point_checked()
 
                 if was_in_bullet_pt:
                     self._reset_indent(cursor)
-                    tool_bar.toggle_bullet_pt(False) 
+                    rich_text_tool_bar.toggle_bullet_point(False) 
 
 
             else:
@@ -160,7 +165,7 @@ class s_text_edit_area(QTextEdit):
         font = cursor.charFormat().font()
         alignment_int = int(block_fmt.alignment())
 
-        action_map = self.tool_bar.action_map
+        action_map = self.rich_text_tool_bar.action_map
 
         action_map['bold_action'].setChecked(True if font.bold() else False)
         action_map['italic_action'].setChecked(True if font.italic() else False)
@@ -309,7 +314,7 @@ class s_text_edit_area(QTextEdit):
 
 
     # Remove <!--StartFragment--> and <!--EndFragment--> 
-    # Becuase they are sometimes inserted inproperly by qt
+    # becuase they are sometimes inserted inproperly by QT
     def _strip_qt_start_and_end_segments_tags(
             self, 
             html

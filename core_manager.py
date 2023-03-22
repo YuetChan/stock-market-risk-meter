@@ -1,4 +1,3 @@
-from PyQt5.QtCore import QModelIndex
 from PyQt5.QtWidgets import QMessageBox
 
 class core_manager:
@@ -33,7 +32,7 @@ class core_manager:
             )
 
         self.file_tree.expand(self.file_tree.model().index(0, 0))
-        self.file_tree.clicked.emit(self.file_tree.model().index(0, 0, QModelIndex()))
+        self.file_tree.click_root_file()
 
         self.auto_delete_msg_box = QMessageBox()
 
@@ -107,15 +106,14 @@ class core_manager:
             self._save_note(self.file_searcher.selected_fpath)
 
         else:
-            self._save_note(self.file_searcher.selected_fpath)
             self.file_searcher.remove_selected_file()
-
+            self._save_note(self.file_searcher.selected_fpath)
+  
             if self.file_searcher.get_file_count() > 0:
-                self.file_searcher.select_first_file()
+                self.file_searcher.click_first_file()
 
             else:
-                self.file_searcher   
-  
+                self.file_tree.click_root_file()
 
 
     def _save_note(self, fpath):

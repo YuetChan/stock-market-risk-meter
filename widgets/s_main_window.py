@@ -162,8 +162,6 @@ class s_main_window(QMainWindow):
             )
 
         action.setCheckable(False)
-        action.setIcon()
-
         self.file_menu.addAction(action)
 
 

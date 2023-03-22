@@ -289,7 +289,12 @@ class s_rich_text_area(QTextEdit):
             ):
         soup = BeautifulSoup(html, 'html.parser')
 
-        allowed_tags = ['p', 'ul', 'li', '!DOCTYPE', 'body', 'html', 'style', 'br', 'span', 'b', 'i', 'u', 'div']
+        allowed_tags = [
+            '!DOCTYPE', 'body', 'html', 'style', 
+            'p', 'ul', 'li', 
+            'br', 'span', 'b', 
+            'i', 'u', 'div'
+            ]
 
         for tag in soup.findAll(True):
             if tag.name not in allowed_tags:

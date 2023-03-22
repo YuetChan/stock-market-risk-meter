@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QModelIndex, QItemSelectionModel, QItemSelection
 from PyQt5.QtWidgets import QTreeView
 from PyQt5.QtGui import QBrush, QColor
 
@@ -44,6 +44,13 @@ class s_file_tree(QTreeView):
         
         self.selected_item = self.model().invisibleRootItem()
         self._highlight_model(self.model().invisibleRootItem())
+
+
+    def click_root_file(self):
+        root_idx = self.model().index(0, 0, QModelIndex())
+
+        self.clicked.emit(root_idx)
+        self.setCurrentIndex(root_idx)
 
 
     def highlight_selected_file(self):

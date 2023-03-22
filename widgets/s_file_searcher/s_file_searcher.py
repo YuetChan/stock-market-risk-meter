@@ -7,13 +7,13 @@ class levenshtein_sort_proxy_model(QSortFilterProxyModel):
     
     def lessThan(
             self, 
-            left_index, 
-            right_index
+            left_idx, 
+            right_idx
             ):
         return Levenshtein.ratio(
-            self.sourceModel().data(left_index), 
+            self.sourceModel().data(left_idx), 
             self.filterRegExp().pattern()) < Levenshtein.ratio(
-            self.sourceModel().data(right_index), 
+            self.sourceModel().data(right_idx), 
             self.filterRegExp().pattern())
 
 
@@ -37,7 +37,9 @@ class s_file_searcher(QWidget):
 
         self._init_file_list_sort_model()
 
-        self.search_bar.connect_text_changed(lambda text: self.file_list.model().setFilterRegExp(text))
+        self.search_bar.connect_text_changed(
+            lambda text: self.file_list.model().setFilterRegExp(text)
+            )
 
         self._init_ui()
 
@@ -46,8 +48,8 @@ class s_file_searcher(QWidget):
         return self.file_list.model().rowCount()
 
 
-    def select_first_file(self):
-        self.file_list.clicked.emit(self.file_list.model().index(0, 0, QModelIndex()))
+    def click_first_file(self):
+        self.file_list.click_first_file()
 
 
     def has_selection(self):
@@ -67,15 +69,16 @@ class s_file_searcher(QWidget):
             self, 
             l_func
             ):
-        self.file_list.file_clicked.connect(lambda idx: self._on_file_clicked(idx, l_func))
+        self.file_list.file_clicked.connect(lambda data: self._on_file_clicked(data, l_func))
 
 
     def _on_file_clicked(
             self, 
-            idx, l_func
+            data, 
+            l_func
             ):
         self.selected_fpath = self.file_list.selected_fpath
-        l_func(idx)
+        l_func(data)
 
 
     def _init_ui(self):

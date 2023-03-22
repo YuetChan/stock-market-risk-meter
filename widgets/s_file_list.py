@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, QModelIndex, QItemSelection, QItemSelectionModel
 from PyQt5.QtWidgets import QListView
 
 # This is a custom list view widget for displaying files. 
@@ -24,10 +24,23 @@ class s_file_list(QListView):
         self.clicked.connect(self._on_file_clicked)
 
 
-    def _on_file_clicked(self, idx):
+    def click_first_file(self):
+        root_idx = self.model().index(0, 0, QModelIndex())
+        self.click_file_by_index(root_idx)
+
+
+    def click_file_by_index(self, idx):
+        self.clicked.emit(idx)
+        self.setCurrentIndex(idx)
+
+
+    def _on_file_clicked(
+            self, 
+            idx
+            ):
         self.selected_fpath = self.model().data(idx)
 
         self.file_clicked.emit({
             'file_path': self.selected_fpath,
-        })
+            })
 

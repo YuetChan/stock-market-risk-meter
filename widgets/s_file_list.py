@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal, QModelIndex, QItemSelection, QItemSelectionModel
+from PyQt5.QtCore import pyqtSignal, QModelIndex
 from PyQt5.QtWidgets import QListView
 
 # This is a custom list view widget for displaying files. 

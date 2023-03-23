@@ -1,6 +1,6 @@
 import Levenshtein
 
-from PyQt5.QtCore import Qt, QSortFilterProxyModel, QModelIndex
+from PyQt5.QtCore import Qt, QSortFilterProxyModel
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
 class levenshtein_sort_proxy_model(QSortFilterProxyModel):
@@ -69,16 +69,22 @@ class s_file_searcher(QWidget):
             self, 
             l_func
             ):
-        self.file_list.file_clicked.connect(lambda data: self._on_file_clicked(data, l_func))
+        # self.file_list.file_clicked.connect(
+        #     lambda data: self._on_file_clicked(data, l_func)
+        #     )
+        self._on_file_clicked(l_func)
 
 
     def _on_file_clicked(
             self, 
-            data, 
+            # data, 
             l_func
             ):
-        self.selected_fpath = self.file_list.selected_fpath
-        l_func(data)
+        # self.selected_fpath = self.file_list.selected_fpath
+        # l_func(data)
+        self.file_list.file_clicked.connect(
+            lambda data: l_func(data)
+            )
 
 
     def _init_ui(self):

@@ -102,5 +102,7 @@ class s_rich_text_editor(QWidget):
     
 
     def _on_text_changed(self, l_func):
-        self.rich_text_area.text_changed.connect(l_func)
+        self.rich_text_area.text_changed.connect(
+            lambda data : l_func(data)
+            )
 

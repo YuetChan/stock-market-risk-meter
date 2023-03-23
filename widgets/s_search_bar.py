@@ -22,7 +22,9 @@ class s_file_search_bar(QWidget):
             self, 
             l_func
             ):
-        self.search_line_edit.textChanged.connect(l_func)
+        self.search_line_edit.textChanged.connect(
+            lambda text : l_func(text)
+            )
 
 
     def _init_ui(self):

@@ -2,35 +2,58 @@ import sys
 import os
 import unittest
 
-from PyQt5.QtCore import Qt, QVariant
-from PyQt5.QtGui import QStandardItemModel, QStandardItem, QBrush, QColor
+from unittest.mock import MagicMock
+
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtTest import QSignalSpy
 
 # Add the parent directory of 'widgets' to the Python system path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), '..'))
 sys.path.append(parent_dir)
 
-from widgets.s_file_tree import s_file_tree
+from widgets.s_text_area import s_text_area
+from widgets.s_find_dialog import s_find_dialog
 
 class test_s_find_dialog(unittest.TestCase):
 
     def setUp(self):
         self.app = QApplication([])
 
-        model = QStandardItemModel()
+        self.text_area = s_text_area()
 
-        model.appendRow(QStandardItem(os.path.abspath(__file__)))
+        self.text_area.highlight_selection = MagicMock()
 
-        self.s_file_list = s_file_list(model)
-
-        self.spy = QSignalSpy(self.s_file_list.file_clicked)
+        self.find_dialog = s_find_dialog(self.text_area)
 
 
     def tearDown(self):
         self.app.quit()
 
 
-    def test_click_first_file_should_emit_click_event(self):
-        self.s_file_list.click_first_file()
+    def test_search_text_should_render_correct_match_count_msg(self):
+        self.text_area.setText('test')
 
-        self.assertEqual(len(self.spy), 1)
+        self.find_dialog.search_field.setText('test')
+        self.find_dialog.search_text()
+
+        self.assertEqual(self.find_dialog.match_counts_label.text(), 'Match count: 1')
+
+
+    def test_search_text_should_call_highlight_selection_when_matching_text_is_found(self):
+        self.text_area.setText('test')
+
+        self.find_dialog.search_field.setText('test')
+        self.find_dialog.search_text()
+
+        self.text_area.highlight_selection.assert_called_once()
+
+    
+    def test_search_text_should_not_call_highlight_selection_when_matching_text_is_not_found(self):
+        self.text_area.setText('')
+
+        self.find_dialog.search_field.setText('test')
+        self.find_dialog.search_text()
+
+        self.text_area.highlight_selection.assert_not_called()
+
+        

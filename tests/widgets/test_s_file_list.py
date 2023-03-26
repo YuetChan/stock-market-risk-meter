@@ -40,17 +40,27 @@ class test_s_file_tree(unittest.TestCase):
     def test_click_first_file_should_update_current_index_to_first_index(self):
         self.s_file_list.click_first_file()
 
-        self.assertEqual(self.s_file_list.currentIndex(), self.s_file_list.model().index(0, 0, QModelIndex()))
+        self.assertEqual(
+            self.s_file_list.currentIndex(), 
+            self.s_file_list.model().index(0, 0, QModelIndex())
+            )
 
 
     def test_click_file_by_index_should_emit_click_event(self):
-        self.s_file_list.click_file_by_index(self.s_file_list.model().index(0, 0, QModelIndex()))
+        self.s_file_list.click_file_by_index(
+            self.s_file_list.model().index(0, 0, QModelIndex())
+            )
 
         self.assertEqual(len(self.spy), 1)
 
 
     def test_click_file_by_index_should_update_current_index_to_test_index(self):
-        self.s_file_list.click_file_by_index(self.s_file_list.model().index(0, 0, QModelIndex()))
+        self.s_file_list.click_file_by_index(
+            self.s_file_list.model().index(0, 0, QModelIndex())
+            )
 
-        self.assertEqual(self.s_file_list.currentIndex(), self.s_file_list.model().index(0, 0, QModelIndex()))
+        self.assertEqual(
+            self.s_file_list.currentIndex(), 
+            self.s_file_list.model().index(0, 0, QModelIndex())
+            )
 

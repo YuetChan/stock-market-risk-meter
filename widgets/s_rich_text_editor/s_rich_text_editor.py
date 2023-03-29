@@ -20,12 +20,12 @@ class s_rich_text_editor(QWidget):
 
         self.rich_text_area = s_rich_text_area()
 
-        self.trich_text_tool_bar = s_rich_text_tool_bar(self.rich_text_area)
+        self.rich_text_tool_bar = s_rich_text_tool_bar(self.rich_text_area)
 
         v_box = QVBoxLayout()
 
         v_box.addWidget(self.rich_text_editor_label)
-        v_box.addWidget(self.trich_text_tool_bar)
+        v_box.addWidget(self.rich_text_tool_bar)
 
         v_box.addWidget(self.rich_text_area)
 
@@ -40,29 +40,29 @@ class s_rich_text_editor(QWidget):
 
 
     def is_bullet_point_checked(self):
-        return self.trich_text_tool_bar.action_map['bullet_action'].isChecked()
+        return self.rich_text_tool_bar.action_map['bullet_action'].isChecked()
     
 
     def toggle_bullet_point(
             self, 
             checked
             ):
-        self.trich_text_tool_bar.action_map['bullet_action'].setChecked(checked)
+        self.rich_text_tool_bar.action_map['bullet_action'].setChecked(checked)
 
 
     def disable_all_actions(self):
-        for action in self.trich_text_tool_bar.action_map.values():
+        for action in self.rich_text_tool_bar.action_map.values():
             action.setEnabled(False)
             action.setChecked(False)
 
 
     def default_all_actions(self):
-        for action in self.trich_text_tool_bar.action_map.values():
+        for action in self.rich_text_tool_bar.action_map.values():
             action.setEnabled(True)
             action.setChecked(False)
 
 
-        self.trich_text_tool_bar.action_map['left_align_action'].setChecked(True)
+        self.rich_text_tool_bar.action_map['left_align_action'].setChecked(True)
 
 
     def connect_text_changed(
@@ -76,14 +76,14 @@ class s_rich_text_editor(QWidget):
         self.rich_text_area.setReadOnly(True)
         self.rich_text_area.setStyleSheet("background-color: #f0f0f0;")
 
-        self.trich_text_tool_bar.disable_all_actions()
+        self.rich_text_tool_bar.disable_all_actions()
 
         
     def set_default_setting(self):    
         self.rich_text_area.setReadOnly(False)
         self.rich_text_area.setStyleSheet("background-color: #FFFFFF;")  
 
-        self.trich_text_tool_bar.default_all_actions()
+        self.rich_text_tool_bar.default_all_actions()
 
     
     def set_html(
@@ -101,7 +101,10 @@ class s_rich_text_editor(QWidget):
         return self.rich_text_area.toPlainText()
     
 
-    def _on_text_changed(self, l_func):
+    def _on_text_changed(
+            self, 
+            l_func
+            ):
         self.rich_text_area.text_changed.connect(
             lambda data : l_func(data)
             )

@@ -3,8 +3,7 @@ from PyQt5.QtWidgets import QListView
 
 # This is a custom list view widget for displaying files. 
 
-# It adds a signal for when a file is clicked 
-# and keeps track of selected file path. 
+# It emits a custom signal when a file is clicked.
 class s_file_list(QListView):
 
     file_clicked = pyqtSignal(dict)

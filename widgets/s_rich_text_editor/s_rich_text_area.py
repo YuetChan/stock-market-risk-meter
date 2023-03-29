@@ -6,13 +6,14 @@ from PyQt5.QtGui import QKeyEvent, QTextListFormat, QTextCursor, QKeySequence
 from PyQt5.QtWidgets import QTextEdit, QApplication
 
 from widgets.s_find_dialog import s_find_dialog
+from widgets.s_text_area import s_text_area
 
 # This class is designed to track key press events 
 # and dynamically update the tool bar based on those events.
 
 # Additionally, it manages clipboard behavior 
 # and provides methods for text highlighting and search functionality
-class s_rich_text_area(QTextEdit):
+class s_rich_text_area(s_text_area):
 
     text_changed = pyqtSignal(dict)
 
@@ -35,51 +36,51 @@ class s_rich_text_area(QTextEdit):
         self.rich_text_tool_bar = rich_text_tool_bar
 
 
-    def highlight_selection(
-            self, 
-            cursor, 
-            start_pos, 
-            end_pos
-            ):
-        cursor.setPosition(start_pos)
-        cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
+    # def highlight_selection(
+    #         self, 
+    #         cursor, 
+    #         start_pos, 
+    #         end_pos
+    #         ):
+    #     cursor.setPosition(start_pos)
+    #     cursor.setPosition(end_pos, QTextCursor.KeepAnchor)
         
-        self.setTextCursor(cursor)
+    #     self.setTextCursor(cursor)
 
 
-    def find_next_match(
-            self, 
-            start_pos, 
-            search_text
-            ):
-        match = self.document().find(search_text, start_pos)
+    # def find_next_match(
+    #         self, 
+    #         start_pos, 
+    #         search_text
+    #         ):
+    #     match = self.document().find(search_text, start_pos)
 
-        if not match.isNull():
-            return match
+    #     if not match.isNull():
+    #         return match
 
-        else:
-            return None   
+    #     else:
+    #         return None   
         
 
-    def get_match_count(
-            self, 
-            search_text
-            ):
-        match_count = 0
-        init_pos = 0
+    # def get_match_count(
+    #         self, 
+    #         search_text
+    #         ):
+    #     match_count = 0
+    #     init_pos = 0
 
-        while True:
-            match = self.document().find(search_text, init_pos)
+    #     while True:
+    #         match = self.document().find(search_text, init_pos)
 
-            if match.isNull():
-                break
-
-
-            init_pos = match.position()
-            match_count += 1
+    #         if match.isNull():
+    #             break
 
 
-        return match_count
+    #         init_pos = match.position()
+    #         match_count += 1
+
+
+    #     return match_count
 
 
     def keyPressEvent(
@@ -150,8 +151,8 @@ class s_rich_text_area(QTextEdit):
             
             cursor.insertHtml(html)
 
-        elif event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
-            self._show_search_dialog()
+        # elif event.modifiers() == Qt.ControlModifier and event.key() == Qt.Key_F:
+        #     self._show_search_dialog()
 
         else:
             super().keyPressEvent(event)
@@ -182,8 +183,8 @@ class s_rich_text_area(QTextEdit):
         self.text_changed.emit({})
 
 
-    def _show_search_dialog(self):
-        s_find_dialog(self).exec_()
+    # def _show_search_dialog(self):
+    #     s_find_dialog(self).exec_()
 
 
     def _is_copy_key(

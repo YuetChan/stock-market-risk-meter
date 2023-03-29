@@ -220,11 +220,15 @@ class s_main_window(QMainWindow):
 
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
-        self.file_tree = s_file_tree(self.c_config['root_dir'], hl_fpaths, hl_decorator)
-        
-        model = self._populate_file_tree_model(self.c_config['root_dir'], self.c_config['project_name'])
+        self.file_tree = s_file_tree(
+            # self.c_config['root_dir'], 
+            hl_fpaths, 
+            hl_decorator
+            )
 
-        self.file_tree.setModel(model)
+        self.file_tree.setModel(
+            self._populate_file_tree_model(self.c_config['root_dir'], self.c_config['project_name'])
+            )
         self.file_tree.setMaximumWidth(300)
 
 
@@ -246,7 +250,7 @@ class s_main_window(QMainWindow):
 
         self.search_title = QLabel('Dangling Notes')
 
-        self.search_bar = s_file_search_bar(self)
+        self.search_bar = s_file_search_bar()
 
         self.file_list = s_file_list(model)
 

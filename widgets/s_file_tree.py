@@ -1,10 +1,10 @@
-from PyQt5.QtCore import Qt, pyqtSignal, QModelIndex, QItemSelectionModel, QItemSelection
+from PyQt5.QtCore import Qt, pyqtSignal, QModelIndex
 from PyQt5.QtWidgets import QTreeView
 from PyQt5.QtGui import QBrush, QColor
 
 # This is a custom tree view widget for files and directories.
 
-# It emits a signal when a file or directory is clicked.
+# It emits a custom signal when a file or directory is clicked.
 
 # It also has methods for highlighting a model of items, 
 # based on a list of file paths to highlight and a decorator function.
@@ -14,7 +14,6 @@ class s_file_tree(QTreeView):
 
     def __init__(
             self, 
-            root_dir,
             hl_fpaths,
             hl_decorator,
             parent=None
@@ -22,11 +21,9 @@ class s_file_tree(QTreeView):
         super(s_file_tree, self).__init__(parent)
 
         self.selected_fpath = None
-        self.selected_item = None
-
         self.is_dir_selected = None
 
-        self.root_dir = root_dir
+        self.selected_item = None
 
         self.hl_fpaths = hl_fpaths
         self.hl_decorator = hl_decorator

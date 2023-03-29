@@ -2,8 +2,6 @@ import sys
 import os
 import unittest
 
-from unittest.mock import MagicMock
-
 from PyQt5.QtWidgets import QApplication
 
 # Add the parent directory of 'widgets' to the Python system path
@@ -28,3 +26,8 @@ class test_s_single_input_dialog(unittest.TestCase):
         self.app.quit()
 
     
+    def test_get_config_should_return_corresponded_config(self):
+        self.dialog.line_edit.setText('test')
+        
+        self.assertEqual(self.dialog.get_config()['project_name'], 'test')
+

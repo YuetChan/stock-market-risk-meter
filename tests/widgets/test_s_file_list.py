@@ -13,7 +13,7 @@ sys.path.append(parent_dir)
 
 from widgets.s_file_list import s_file_list
 
-class test_s_file_tree(unittest.TestCase):
+class test_s_file_list(unittest.TestCase):
 
     def setUp(self):
         self.app = QApplication([])

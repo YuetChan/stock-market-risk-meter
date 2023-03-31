@@ -1,1 +1,3 @@
-./resources/*.db
+resources/*.db
+__pycache__/*
+widgets/__pycache__/*

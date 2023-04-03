@@ -7,7 +7,7 @@ from widgets.s_find_dialog import s_find_dialog
 # This class inherits QTextEdit 
 # and provides highlight_selection ,find_next_match and get_match_count implementation
 
-# It also display find dialog when ctrl + f
+# It also display find dialog when Ctrl + f
 class s_text_area(QTextEdit):
 
     text_changed = pyqtSignal(dict)
@@ -80,5 +80,3 @@ class s_text_area(QTextEdit):
     def _show_search_dialog(self):
         s_find_dialog(self).exec_()
 
-
-    

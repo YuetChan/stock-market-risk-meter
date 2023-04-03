@@ -15,4 +15,3 @@ class db_connector:
   def get_connection(self):
     return self.conn
 
-

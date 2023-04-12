@@ -5,3 +5,4 @@ dist/*
 build/*
 main.spec
 s_config.json
+myenv

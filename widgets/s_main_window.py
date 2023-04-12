@@ -118,7 +118,7 @@ class s_main_window(QMainWindow):
 
 
     def _init_actions_ui(self):
-        self.setWindowTitle('Sc Note')
+        self.setWindowTitle('code meta')
 
         self._init_file_menu()
 

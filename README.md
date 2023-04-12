@@ -1,6 +1,6 @@
-# Sc note
+# code meta
 
-Sc note is a GUI application that allows users to manage and edit notes associated with files.
+code meta is a GUI application that allows developers to manage and edit notes associated with files.
 
 ## Dependencies
 

@@ -43,7 +43,7 @@ class s_main_window(QMainWindow):
         self.file_tree = None
         self.text_editor = None
 
-        self.c_helper = core_helper(db_connector('./resources/test.db').get_connection())
+        self.c_helper = core_helper(db_connector('./resources/sc_note.db').get_connection())
 
         self.c_config = { }
         self.c_manager = None

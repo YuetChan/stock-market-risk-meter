@@ -7,6 +7,8 @@
 
 Code Meta is a GUI application that allows developers to manage and edit notes associated with files.
 
+![CodeMetaScreenshot](https://i.ibb.co/cJ0RBQ3/Screenshot-from-2023-04-13-00-32-03.png)
+
 ## Dependencies
 
 The following dependencies are required to run the Project Name application:

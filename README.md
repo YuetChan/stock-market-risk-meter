@@ -1,21 +1,18 @@
-# code meta
+# Code Meta
 
-code meta is a GUI application that allows developers to manage and edit notes associated with files.
+Code Meta is a GUI application that allows developers to manage and edit notes associated with files.
 
 ## Dependencies
 
 The following dependencies are required to run the Project Name application:
 
-- Python X.X: Replace with the version of Python that your application requires.
-- PyQt: Replace with the version of PyQt that your application uses.
+- Python 3.8 +
 
 ## Installation
 
-1. Clone the repository or download the source code.
-2. Install the required dependencies using the appropriate package manager for your environment.
-3. Run the application using the appropriate command or by double-clicking the executable file.
-4. Follow the on-screen instructions to open an existing project or create a new project.
-5. Use the file tree, text editor, and formatting tools to manage projects and edit notes associated with files.
+1. Clone the Code Meta repository: `git clone https://github.com/YuetChan/code-meta.git`
+2. Change to the code-meta directory: `cd /path/to/code-meta`
+3. Make the build.sh script executable: `chmod +x ./build.sh`
 
 ## Usage
 

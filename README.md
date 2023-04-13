@@ -13,6 +13,7 @@ The following dependencies are required to run the Project Name application:
 1. Clone the Code Meta repository: `git clone https://github.com/YuetChan/code-meta.git`
 2. Change to the code-meta directory: `cd /path/to/code-meta`
 3. Make the build.sh script executable: `chmod +x ./build.sh`
+4. Code Meta icon should show up on show applications/application menu
 
 ## Usage
 

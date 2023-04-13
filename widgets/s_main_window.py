@@ -43,7 +43,7 @@ class s_main_window(QMainWindow):
         self.file_tree = None
         self.text_editor = None
 
-        self.c_helper = core_helper(db_connector('./resources/sc_note.db').get_connection())
+        self.c_helper = core_helper(db_connector(os.environ['code_meta_dir'] + '/resources/sc_note.db').get_connection())
 
         self.c_config = { }
         self.c_manager = None
@@ -118,7 +118,7 @@ class s_main_window(QMainWindow):
 
 
     def _init_actions_ui(self):
-        self.setWindowTitle('code meta')
+        self.setWindowTitle('Code Meta')
 
         self._init_file_menu()
 
@@ -156,7 +156,7 @@ class s_main_window(QMainWindow):
 
     def _init_auto_save_action(self):
         action = QAction(
-            QIcon('./resources/check-solid.svg'), 
+            QIcon(os.environ['code_meta_dir'] + '/resources/check-solid.svg'), 
             'Auto Save', 
             self
             )

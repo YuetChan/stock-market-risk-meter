@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=Code meta
+Comment=Code meta GUI
+Exec=path_to_application
+
+Terminal=true
+Type=Application
+Categories=Utility;Development;

@@ -1,3 +1,5 @@
+import os
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QAction, QToolBar
 from PyQt5.QtGui import QFont, QTextListFormat, QIcon, QTextCursor
@@ -122,7 +124,7 @@ class s_rich_text_tool_bar(QToolBar):
 
     def _init_bullet_point_action(self):
         action = QAction(
-            QIcon('./resources/list-solid.svg'), 
+            QIcon(os.environ['code_meta_dir'] + '/resources/list-solid.svg'), 
             'Bullet Points', 
             self
             )
@@ -196,7 +198,7 @@ class s_rich_text_tool_bar(QToolBar):
 
     def _init_undo_action(self):
         action = QAction(
-            QIcon('./resources/rotate-left-solid.svg'), 
+            QIcon(os.environ['code_meta_dir'] + '/resources/rotate-left-solid.svg'), 
             'Undo', 
             self
             )
@@ -212,7 +214,7 @@ class s_rich_text_tool_bar(QToolBar):
 
     def _init_redo_action(self):
         action = QAction(
-            QIcon('./resources/rotate-right-solid.svg'), 
+            QIcon(os.environ['code_meta_dir'] + '/resources/rotate-right-solid.svg'), 
             'Redo', 
             self
             )

@@ -1,5 +1,10 @@
 # Code Meta
 
+[![Release](https://img.shields.io/badge/Release-v1.0.0-blue.svg)](https://github.com/YuetChan/code-meta/releases/tag/v1.0.0)
+[![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/YuetChan/code-meta)
+[![Issue](https://img.shields.io/github/issues/YuetChan/code-meta)](https://github.com/YuetChan/code-meta/issues)
+[![License](https://img.shields.io/badge/License-GPL-yellow.svg)](https://github.com/YuetChan/code-meta/blob/main/LICENSE)
+
 Code Meta is a GUI application that allows developers to manage and edit notes associated with files.
 
 ## Dependencies
@@ -26,8 +31,9 @@ The following dependencies are required to run the Project Name application:
 
 ## License
 
-This project is licensed under the [License Name] License - see the LICENSE file for details.
+This project is licensed under the GPL License - see the [LICENSE](https://github.com/YuetChan/code-meta/blob/master/LICENSE)
+ file for details.
 
 ## Contact Information
 
-For any questions or inquiries, please contact [Your Name] at [Your Email Address].
+For any questions or inquiries, please contact Yuet Chan at yuetcheukchan@gmail.com.

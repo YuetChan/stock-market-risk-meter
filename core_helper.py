@@ -12,11 +12,12 @@ class core_helper:
 
     def init_project(
             self, 
+            id,
             name
             ):
         cursor = self.conn.cursor()
         cursor.execute("INSERT INTO project(id, name) VALUES(?, ?)", 
-                   (str(uuid.uuid4()), name, ))
+                   (id, name, ))
 
         num_rows_affected = cursor.rowcount
         self.conn.commit()

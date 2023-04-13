@@ -92,14 +92,19 @@ class s_main_window(QMainWindow):
             c_reader = config_reader(fpath)
 
             if c_reader.is_valid:
-                self.c_config['project_id'] = c_reader.get_project_id()
-                self.c_config['project_name'] = c_reader.get_project_name()
+                if self.c_helper.select_project_by_id(c_reader.get_project_id()) != None:
+                    self.c_config['project_id'] = c_reader.get_project_id()
+                    self.c_config['project_name'] = c_reader.get_project_name()
 
-                self.c_config['root_dir'] = os.path.dirname(fpath)
+                    self.c_config['root_dir'] = os.path.dirname(fpath)
             
-                # Clean up previous widgets before init new widgets
-                self._clean_up()
-                self._init_core_ui()
+                    # Clean up previous widgets before init new widgets
+                    self._clean_up()
+                    self._init_core_ui()
+
+                else:
+                    # Invalid project id
+                    self._show_config_file_not_valid_msg()
 
             else:
                 self._show_config_file_not_valid_msg()
@@ -167,11 +172,17 @@ class s_main_window(QMainWindow):
 
     def _prompt_project_config(self):
         if self.dialog.exec_() == QDialog.Accepted:
-            self.c_config['project_name'] = self.dialog.get_config()['project_name']
             self.c_config['project_id'] = str(uuid.uuid4())
+            self.c_config['project_name'] = self.dialog.get_config()['project_name']
+
+            self.c_helper.init_project(
+                self.c_config['project_id'], 
+                self.c_config['project_name']
+                )           
 
             try:    
-                with open(os.path.join(self.c_config['root_dir'], self.default_config_fname), 'w') as f:
+                with open(
+                    os.path.join(self.c_config['root_dir'], self.default_config_fname), 'w') as f:
                     json.dump({
                         'id': self.c_config['project_id'],
                         'name': self.c_config['project_name']
@@ -221,7 +232,6 @@ class s_main_window(QMainWindow):
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
         self.file_tree = s_file_tree(
-            # self.c_config['root_dir'], 
             hl_fpaths, 
             hl_decorator
             )

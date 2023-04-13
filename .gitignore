@@ -6,3 +6,4 @@ build/*
 main.spec
 s_config.json
 myenv
+code_meta.desktop

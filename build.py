@@ -3,7 +3,7 @@ import subprocess
 import distro
 import json
 
-subprocess.run(["rm", "./code_meta_backup.desktop"])
+subprocess.run(["rm", "./code_meta.desktop"])
 
 subprocess.run(['python3', '-m', 'venv', 'myenv'])
 subprocess.run(['source', 'myenv/bin/activate'], shell=True)
@@ -19,7 +19,7 @@ os.environ.pop("VIRTUAL_ENV", None)
 subprocess.run(["rm", "-r", "myenv"])
 
 # Edit code_meta.desktop
-subprocess.run(["cp", "code_meta.desktop", "code_meta_backup.desktop"])
+subprocess.run(["cp", "code_meta_template.desktop", "code_meta.desktop"])
 subprocess.run(["cp", "-r", "resources", "./dist/main/resources"])
 
 def replace_string_in_file(fpath, old_str, new_str):
@@ -65,10 +65,10 @@ def move_desktop_file(fpath):
 
 
 replace_string_in_file(
-    './code_meta_backup.desktop', 
+    './code_meta.desktop', 
     'path_to_application', 
     os.path.dirname(os.path.abspath(__file__)) + '/dist/main/main'
     )
 
-move_desktop_file('./code_meta_backup.desktop')
+move_desktop_file('./code_meta.desktop')
 

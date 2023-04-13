@@ -2,7 +2,7 @@
 Version=1.0
 Name=Code meta
 Comment=Code meta GUI
-Exec=path_to_application
+Exec=/home/yuet/Downloads/code-meta/dist/main/main
 
 Terminal=true
 Type=Application

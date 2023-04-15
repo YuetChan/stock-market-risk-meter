@@ -4,7 +4,6 @@ from PyQt5.QtWidgets import QApplication
 
 from widgets.s_main_window import s_main_window
 
-# Set the value of the variable
 os.environ['code_meta_dir'] = os.path.dirname(os.path.abspath(__file__))
 
 if __name__ == '__main__':

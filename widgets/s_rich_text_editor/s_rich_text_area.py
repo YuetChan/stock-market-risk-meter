@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 import hashlib
 
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QKeyEvent, QTextListFormat, QTextCursor, QKeySequence
+from PyQt5.QtGui import QKeyEvent, QTextListFormat, QTextCursor, QKeySequence, QFont
 from PyQt5.QtWidgets import QTextEdit, QApplication
 
 from widgets.s_find_dialog import s_find_dialog
@@ -105,6 +105,32 @@ class s_rich_text_area(s_text_area):
             cursor.insertHtml(html)
 
 
+# Enforce default block format, font family, font size on pasted text
+# --------------------------------------------------------------------
+            cursor_pos = cursor.position()
+
+            # Ctrl + a
+            cursor.movePosition(QTextCursor.Start)
+            cursor.movePosition(QTextCursor.End, QTextCursor.KeepAnchor)
+            
+            charFormat = cursor.charFormat()
+
+            font = charFormat.font()
+            font.setFamily('ubuntu')
+
+            charFormat.setFont(font)
+
+            cursor.setCharFormat(charFormat)
+
+            self.setTextCursor(cursor)
+
+            cursor.setPosition(cursor_pos)
+
+            self.setTextCursor(cursor)
+
+
+# --------------------------------------------------------------------
+
         else:
             super().keyPressEvent(event)
 
@@ -114,7 +140,38 @@ class s_rich_text_area(s_text_area):
 
         block_fmt = cursor.blockFormat()
 
-        font = cursor.charFormat().font()
+
+# When text is pasted at the start of text edit area,
+# the pos -1 will have non default char and block format
+
+# So this is the hack to enforce default block format, font family, font size
+# --------------------------------------------------------------------
+        if block_fmt.topMargin() > 0 or block_fmt.bottomMargin() > 0:
+            block_fmt.setTopMargin(0)
+            block_fmt.setBottomMargin(0)
+
+            cursor.setBlockFormat(block_fmt)
+
+            self.setTextCursor(cursor)
+
+
+        char_fmt = cursor.charFormat()
+
+        font = char_fmt.font()
+
+        if font.family != 'ubuntu':
+            font.setFamily('ubuntu')
+            font.setPointSize(11)
+
+            char_fmt.setFont(font)
+
+            cursor.setCharFormat(char_fmt)
+
+            self.setTextCursor(cursor)
+
+
+# --------------------------------------------------------------------
+
         alignment_int = int(block_fmt.alignment())
 
         action_map = self.rich_text_tool_bar.action_map
@@ -241,7 +298,8 @@ class s_rich_text_area(s_text_area):
             '!DOCTYPE', 'body', 'html', 'style', 
             'p', 'ul', 'li', 
             'br', 'span', 'b', 
-            'i', 'u', 'div'
+            'i', 'u', 'div', 
+            'pre', 'code'
             ]
 
         for tag in soup.findAll(True):
@@ -250,7 +308,18 @@ class s_rich_text_area(s_text_area):
 
 
         return str(soup)
-    
+
+
+    def _clear_classes(
+            self,
+            soup
+            ):
+        for tag in soup.find_all():
+            tag.attrs = {}
+
+
+        return soup
+
 
     def _set_qt_clipboard_cache(
             self, 

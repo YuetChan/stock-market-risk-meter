@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Name=Code meta
-Comment=Code meta GUI
-Exec=/home/yuet/Downloads/code-meta/dist/main/main
-
-Terminal=true
-Type=Application
-Categories=Utility;Development;

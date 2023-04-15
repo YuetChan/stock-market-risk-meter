@@ -4,6 +4,6 @@ Name=Code meta
 Comment=Code meta GUI
 Exec=path_to_application
 
-Terminal=true
+Terminal=false
 Type=Application
 Categories=Utility;Development;

@@ -11,3 +11,16 @@ class fs_helper:
 
       return file_paths
 
+
+    def relativize_file_path(fpath):
+        return fpath.replace(os.path.dirname(os.path.abspath(__file__)), '.') 
+
+
+    def relativize_file_paths(fpaths):
+        relativized_fpaths = []
+
+        for fpath in fpaths:
+            relativized_fpaths.append(fs_helper.relativize_file_path(fpath))
+
+
+        return relativized_fpaths    

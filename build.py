@@ -23,6 +23,7 @@ subprocess.run(["rm", "-r", "myenv"])
 subprocess.run(["cp", "code_meta_template.desktop", "code_meta.desktop"])
 subprocess.run(["cp", "-r", "resources", "./dist/main/resources"])
 
+
 def replace_string_in_file(fpath, old_str, new_str):
     try:
         # Open the file in read mode
@@ -42,7 +43,6 @@ def replace_string_in_file(fpath, old_str, new_str):
 
     except Exception as e:
         print(f"Failed to replace '{old_str}' with '{new_str}' in '{fpath}': {e}")
-
 
 
 def move_desktop_file(fpath):

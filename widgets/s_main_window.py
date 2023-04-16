@@ -216,7 +216,9 @@ class s_main_window(QMainWindow):
 
 
     def _init_file_tree(self):
-        all_fpaths = fs_helper.get_all_filepaths(self.c_config['root_dir'])
+        all_fpaths = fs_helper.relativize_file_paths(
+            fs_helper.get_all_filepaths(self.c_config['root_dir'])
+            )
 
         fpath_rows = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_in(
             self.c_config['project_id'], 
@@ -232,7 +234,7 @@ class s_main_window(QMainWindow):
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
         self.file_tree = s_file_tree(
-            hl_fpaths, 
+            fs_helper.relativize_file_paths(hl_fpaths),
             hl_decorator
             )
 
@@ -243,7 +245,9 @@ class s_main_window(QMainWindow):
 
 
     def _init_file_searcher(self):
-        all_fpaths = fs_helper.get_all_filepaths(self.c_config['root_dir'])
+        all_fpaths = fs_helper.relativize_file_paths(
+            fs_helper.get_all_filepaths(self.c_config['root_dir'])
+            )
 
         fpath_rows = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_not_in(
             self.c_config['project_id'], 
@@ -340,16 +344,17 @@ class s_main_window(QMainWindow):
             root_dir,
             label
             ):
-        root_item = QStandardItem(root_dir)
+        # Special case
+        root_item = QStandardItem('.')
 
-        root_item.setData(QVariant([root_dir, True]), Qt.UserRole)
+        root_item.setData(QVariant([fs_helper.relativize_file_path(root_dir), True]), Qt.UserRole)
 
         model = QStandardItemModel()
 
         model.setHorizontalHeaderLabels([label])
         model.appendRow(root_item)
 
-        self._add_files(root_item, root_dir, model)
+        self._add_files(root_item, root_dir )
 
         return model
 
@@ -358,7 +363,7 @@ class s_main_window(QMainWindow):
             self, 
             parent, 
             path,
-            model
+            
             ):
         for fname in os.listdir(path):
             fpath = os.path.join(path, fname)
@@ -366,15 +371,17 @@ class s_main_window(QMainWindow):
             if not os.path.isdir(fpath):
                 item = QStandardItem(fname)
                 
-                item.setData(QVariant([fpath, False]), Qt.UserRole)
+                item.setData(QVariant([fs_helper.relativize_file_path(fpath), False]), Qt.UserRole)
                 parent.appendRow(item)
 
 
             if os.path.isdir(fpath):
                 item = QStandardItem(fname)
 
-                item.setData(QVariant([fpath, True]), Qt.UserRole)
+                item.setData(QVariant([fs_helper.relativize_file_path(fpath), True]), Qt.UserRole)
                 parent.appendRow(item)
 
-                self._add_files(item, fpath, model)
+                self._add_files(item, fpath)
+
+
 

@@ -1,0 +1,20 @@
+{
+    "id": "",
+    "name": "",
+    
+    "file_paths": {
+        "filepath1": {
+            "note": "",
+            "plain_text_note": ""
+        },
+        "filepath2": {
+            "note": "",
+            "plain_text_note": ""
+        },
+        "filepath3": {
+            "note": "Not empty",
+            "plain_text_note": "Not empty"
+        }
+    }
+
+}

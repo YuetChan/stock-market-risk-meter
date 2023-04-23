@@ -53,25 +53,18 @@ class core_manager:
 
 
     def _open_note(self, fpath, is_dir):
+        print('called')
         self.rich_text_editor.set_label(f'Directory :  {fpath}' if is_dir else f'File :  {fpath}')
 
-        note = self.core_helper.select_note_by_filepath_n_project_id(
-            fpath, 
-            self.project_id
-            )
+        note = self.core_helper.select_note_by_filepath(fpath)
 
-        if note != None and note[1] != '':
-            self.rich_text_editor.set_html(note[0])
+        if note != None:
+            self.rich_text_editor.set_html(note['note'])
             self.rich_text_editor.set_default_setting()
             
         else:
             self.rich_text_editor.set_html('')
-
-            if is_dir:
-                self.rich_text_editor.set_read_only()
-
-            else:
-                self.rich_text_editor.set_default_setting()
+            self.rich_text_editor.set_default_setting()
 
 
         return
@@ -117,11 +110,10 @@ class core_manager:
 
 
     def _save_note(self, fpath):
-        self.core_helper.add_note_by_filepath_n_project_id(
+        self.core_helper.add_note_by_filepath(
             self.rich_text_editor.to_html(), 
             self.rich_text_editor.to_plain_text(),
-            fpath, 
-            self.project_id
+            fpath
             )
         
 

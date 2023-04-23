@@ -5,7 +5,6 @@ import unittest
 from unittest.mock import MagicMock
 
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtTest import QSignalSpy
 
 # Add the parent directory of 'widgets' to the Python system path
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), '..'))

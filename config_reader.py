@@ -4,9 +4,11 @@ class config_reader:
 
     def __init__(
             self, 
-            fname
+            fpath
             ):
-        with open(fname, 'r') as f:
+        self.fpath = fpath
+
+        with open(self.fpath, 'r') as f:
             try:
                 json_obj = json.load(f)
 
@@ -30,8 +32,21 @@ class config_reader:
         return self.data['name']
 
 
+    def get_note(self, fpath):
+        return self.data[fpath]['note']
+    
+
+    def get_plain_text_note(self, fpath):
+        return self.data[fpath]['plain_text_note']
+
+
     def get_data_source(self):
         return self.data
+
+
+    def update_data_soruce(self, data):
+        with open(self.fpath, 'w') as outfile:
+            json.dump(data, outfile)
 
 
     def create_new_config(dir):

@@ -10,7 +10,6 @@ from config_reader import config_reader
 
 from core_helper import core_helper
 from core_manager import core_manager
-from db_connector import db_connector
 from fs_helper import fs_helper
 
 from widgets.s_single_input_dialog import s_single_input_dialog
@@ -43,7 +42,8 @@ class s_main_window(QMainWindow):
         self.file_tree = None
         self.text_editor = None
 
-        self.c_helper = core_helper(db_connector(os.environ['code_meta_dir'] + '/resources/sc_note.db').get_connection())
+
+        self.c_helper = None
 
         self.c_config = { }
         self.c_manager = None
@@ -67,6 +67,9 @@ class s_main_window(QMainWindow):
             self._show_config_file_existed_msg()
                 
         elif self._prompt_project_config():
+            c_reader = config_reader(os.path.join(self.c_config['root_dir'], self.default_config_fname))
+            self.c_helper = core_helper(c_reader)
+
              # Clean up previous widgets before init new widgets
             self._clean_up()
             self._init_core_ui()
@@ -91,20 +94,16 @@ class s_main_window(QMainWindow):
         if  os.path.basename(fpath) == self.default_config_fname:
             c_reader = config_reader(fpath)
 
+            self.c_helper = core_helper(c_reader)
+
             if c_reader.is_valid:
-                if self.c_helper.select_project_by_id(c_reader.get_project_id()) != None:
-                    self.c_config['project_id'] = c_reader.get_project_id()
-                    self.c_config['project_name'] = c_reader.get_project_name()
+                self.c_config['project_id'] = c_reader.get_project_id()
+                self.c_config['project_name'] = c_reader.get_project_name()
 
-                    self.c_config['root_dir'] = os.path.dirname(fpath)
-            
-                    # Clean up previous widgets before init new widgets
-                    self._clean_up()
-                    self._init_core_ui()
-
-                else:
-                    # Invalid project id
-                    self._show_config_file_not_valid_msg()
+                self.c_config['root_dir'] = os.path.dirname(fpath)
+                
+                self._clean_up()
+                self._init_core_ui()
 
             else:
                 self._show_config_file_not_valid_msg()
@@ -173,20 +172,14 @@ class s_main_window(QMainWindow):
     def _prompt_project_config(self):
         if self.dialog.exec_() == QDialog.Accepted:
             self.c_config['project_id'] = str(uuid.uuid4())
-            self.c_config['project_name'] = self.dialog.get_config()['project_name']
+            self.c_config['project_name'] = self.dialog.get_config()['project_name']         
 
-            self.c_helper.init_project(
-                self.c_config['project_id'], 
-                self.c_config['project_name']
-                )           
-
-            try:    
-                with open(
-                    os.path.join(self.c_config['root_dir'], self.default_config_fname), 'w') as f:
-                    json.dump({
-                        'id': self.c_config['project_id'],
-                        'name': self.c_config['project_name']
-                    }, f)
+            try:
+                self.init_config(
+                    self.c_config['project_id'], 
+                    self.c_config['project_name'], 
+                    os.path.join(self.c_config['root_dir'], self.default_config_fname)
+                    )    
 
                 return True
 
@@ -220,17 +213,8 @@ class s_main_window(QMainWindow):
             fs_helper.get_all_filepaths(self.c_config['root_dir'])
             )
 
-        fpath_rows = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_in(
-            self.c_config['project_id'], 
-            all_fpaths
-            )
+        hl_fpaths = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_filepaths_in(all_fpaths)
         
-        hl_fpaths = []
-
-        for row in fpath_rows:
-            hl_fpaths.append(row[0])
-
-
         hl_decorator = lambda item: item.setForeground(QBrush(QColor('green')))
 
         self.file_tree = s_file_tree(
@@ -249,15 +233,12 @@ class s_main_window(QMainWindow):
             fs_helper.get_all_filepaths(self.c_config['root_dir'])
             )
 
-        fpath_rows = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_project_id_n_filepaths_not_in(
-            self.c_config['project_id'], 
-            all_fpaths
-            )
+        fpaths = self.c_helper.select_filepaths_with_non_empty_plain_text_note_by_filepaths_not_in(all_fpaths)
 
         model = QStandardItemModel()
 
-        for row in fpath_rows:
-            item = QStandardItem(row[0])
+        for fpath in fpaths:
+            item = QStandardItem(fpath)
 
             model.appendRow(item)
 
@@ -383,5 +364,19 @@ class s_main_window(QMainWindow):
 
                 self._add_files(item, fpath)
 
+
+    def init_config(
+            self,
+            id, 
+            name, 
+            fpath):
+        json_data = {
+          "id": id,
+          "name": name,
+          "file_paths": {}
+        }
+
+        with open(fpath, 'w') as outfile:
+            json.dump(json_data, outfile)
 
 

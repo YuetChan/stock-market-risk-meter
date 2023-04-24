@@ -53,7 +53,6 @@ class core_manager:
 
 
     def _open_note(self, fpath, is_dir):
-        print('called')
         self.rich_text_editor.set_label(f'Directory :  {fpath}' if is_dir else f'File :  {fpath}')
 
         note = self.core_helper.select_note_by_filepath(fpath)

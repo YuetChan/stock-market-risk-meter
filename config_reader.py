@@ -32,6 +32,10 @@ class config_reader:
         return self.data['name']
 
 
+    def get_user(self):
+        return self.data['user']
+
+
     def get_note(self, fpath):
         return self.data[fpath]['note']
     

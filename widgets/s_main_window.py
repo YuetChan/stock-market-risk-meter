@@ -42,7 +42,6 @@ class s_main_window(QMainWindow):
         self.file_tree = None
         self.text_editor = None
 
-
         self.c_helper = None
 
         self.c_config = { }
@@ -100,6 +99,7 @@ class s_main_window(QMainWindow):
                 self.c_config['project_id'] = c_reader.get_project_id()
                 self.c_config['project_name'] = c_reader.get_project_name()
 
+                self.c_config['user'] = c_reader.get_user()
                 self.c_config['root_dir'] = os.path.dirname(fpath)
                 
                 self._clean_up()
@@ -116,8 +116,12 @@ class s_main_window(QMainWindow):
     def _init_dialogs_ui(self):
         self.dialog = s_single_input_dialog({
             'dialog_title': 'New Project',
-            'dialog_var': 'project_name',
-            'dialog_msg': 'Enter a project'
+            'dialog_var_1': 'project_name',
+            'dialog_var_2': 'user',
+            'dialog_var_3': 'dirpath',
+            'dialog_msg_1': 'Enter a project name',
+            'dialog_msg_2': 'Enter an username',
+            'dialog_msg_3': 'Choose a datasource directory',
         })
 
 
@@ -172,12 +176,14 @@ class s_main_window(QMainWindow):
     def _prompt_project_config(self):
         if self.dialog.exec_() == QDialog.Accepted:
             self.c_config['project_id'] = str(uuid.uuid4())
-            self.c_config['project_name'] = self.dialog.get_config()['project_name']         
+            self.c_config['project_name'] = self.dialog.get_config()['project_name']
+            self.c_config['user'] = self.dialog.get_config()['user']         
 
             try:
                 self.init_config(
                     self.c_config['project_id'], 
                     self.c_config['project_name'], 
+                    self.c_config['user'],
                     os.path.join(self.c_config['root_dir'], self.default_config_fname)
                     )    
 
@@ -209,6 +215,8 @@ class s_main_window(QMainWindow):
 
 
     def _init_file_tree(self):
+        print(self.c_config['root_dir'])
+
         all_fpaths = fs_helper.relativize_file_paths(
             fs_helper.get_all_filepaths(self.c_config['root_dir'])
             )
@@ -335,7 +343,7 @@ class s_main_window(QMainWindow):
         model.setHorizontalHeaderLabels([label])
         model.appendRow(root_item)
 
-        self._add_files(root_item, root_dir )
+        self._add_files(root_item, root_dir)
 
         return model
 
@@ -369,11 +377,13 @@ class s_main_window(QMainWindow):
             self,
             id, 
             name, 
+            user,
             fpath):
         json_data = {
           "id": id,
           "name": name,
-          "file_paths": {}
+          "user": user,
+          "file_paths": { }
         }
 
         with open(fpath, 'w') as outfile:

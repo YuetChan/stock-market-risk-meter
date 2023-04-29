@@ -161,6 +161,7 @@ class s_main_window(QMainWindow):
         if c_reader.is_valid:
             if self.c_config['project_name'] != c_reader.get_project_name():
                 self._show_missmtach_project_msg()
+
                 return
             
 
@@ -177,7 +178,11 @@ class s_main_window(QMainWindow):
 
             self.text_editors_map[self.c_config['active_user']] = s_rich_text_editor()
 
-            self._update_core_ui()
+            self._update_tab()
+
+            self._update_file_tree()
+            self._update_file_searcher()
+            
             self._update_core_manager()
 
         else:
@@ -339,6 +344,10 @@ class s_main_window(QMainWindow):
             self.text_editors_map[self.c_config['active_user']], 
             f"{self.c_config['active_user']}"
             )
+    
+        self.tab.connect_tab_changed(
+            lambda idx: self._on_tab_changed(idx)
+            )
 
 
     def _init_left_panel(self):
@@ -364,16 +373,23 @@ class s_main_window(QMainWindow):
         return self.text_editors_map[self.c_config['active_user']]
 
 
-    def _on_tab_changed(self, index):
-        # Get the tab widget that emitted the signal
+    def _on_tab_changed(
+            self, 
+            idx
+            ):
         sender = self.tab.sender()
-        # Get the current tab index
-        current_tab_index = sender.currentIndex()
 
-        # Get the text of the current tab
-        current_tab_text = sender.tabText(current_tab_index)
-        print("Clicked Tab Index:", current_tab_index)
-        print("Clicked Tab Text:", current_tab_text)
+        self.c_config['active_user'] = sender.tabText(idx)
+        self.c_config['active_ds_fpath'] = self.c_config['ds_fpath_map'][self.c_config['active_user']]
+
+        c_reader = config_reader(self.c_config['active_ds_fpath'])
+        
+        self.c_helper = core_helper(c_reader)
+
+        self._update_file_tree()
+        self._update_file_searcher()
+            
+        self._update_core_manager()
 
 
     def _init_central_widget(self):
@@ -495,8 +511,6 @@ class s_main_window(QMainWindow):
             ):
         # Special case
         root_item = QStandardItem('.')
-
-        print(root_item.text())
 
         root_item.setData(QVariant([fs_helper.relativize_file_path(root_dir), True]), Qt.UserRole)
 

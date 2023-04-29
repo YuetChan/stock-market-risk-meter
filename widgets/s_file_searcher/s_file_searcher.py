@@ -44,6 +44,15 @@ class s_file_searcher(QWidget):
         self._init_ui()
 
 
+    def update_file_list(self, file_list):
+        self.file_list = file_list
+
+        self.selected_fpath = self.file_list.selected_fpath
+
+        self._init_file_list_sort_model()
+        # more?
+
+
     def get_file_count(self):
         return self.file_list.model().rowCount()
 

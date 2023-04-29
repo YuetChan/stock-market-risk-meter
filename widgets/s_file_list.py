@@ -23,6 +23,11 @@ class s_file_list(QListView):
         self.clicked.connect(self._on_file_clicked)
 
 
+    def update_model(self, model):
+        self.src_model = model
+        self.setModel(model)
+
+
     def click_first_file(self):
         root_idx = self.model().index(0, 0, QModelIndex())
         self.click_file_by_index(root_idx)

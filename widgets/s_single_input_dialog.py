@@ -19,7 +19,7 @@ class s_single_input_dialog(QDialog):
         return {
             self.input_map['dialog_var_1']: self.line_edit_1.text(),
             self.input_map['dialog_var_2']: self.line_edit_2.text(),
-            self.input_map['dialog_var_3']: self.dir_path
+            self.input_map['dialog_var_3']: self.dirpath
         }
 
 
@@ -29,7 +29,7 @@ class s_single_input_dialog(QDialog):
         self.choose_file = QPushButton('Choose')
 
         self.choose_file.setGeometry(50, 50, 200, 30)
-        self.choose_file.clicked.connect(self.showDirDialog)
+        self.choose_file.clicked.connect(self.show_dir_dialog)
 
         self.label_1 = QLabel(self.input_map['dialog_msg_1'])
         self.label_2 = QLabel(self.input_map['dialog_msg_2'])
@@ -61,7 +61,6 @@ class s_single_input_dialog(QDialog):
         file_choose_layout = QVBoxLayout()
 
         file_choose_layout.addWidget(self.label_4)
-        # Add a stretchable spacer to the layout
         file_choose_layout.addStretch(1)
         file_choose_layout.addWidget(self.button_box)
 
@@ -75,10 +74,11 @@ class s_single_input_dialog(QDialog):
         self.setLayout(layout)
 
 
-    def showDirDialog(self):
+    def show_dir_dialog(self):
         options = QFileDialog.Options()
         options |= QFileDialog.ReadOnly
-        self.dir_path = QFileDialog.getExistingDirectory(self, 'Choose a directory', '', options=options)
 
-        self.label_4.setText(f'Directory:  {self.dir_path}')
+        self.dirpath = QFileDialog.getExistingDirectory(self, 'Choose a directory', '', options=options)
+
+        self.label_4.setText(f"Directory:  {self.dirpath}")
 

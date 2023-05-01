@@ -78,16 +78,17 @@ class s_file_searcher(QWidget):
             self, 
             l_func
             ):
-        self._on_file_clicked(l_func)
+        self.file_list.file_clicked.connect(
+            lambda data: self._on_file_clicked(l_func, data)
+        )
 
 
     def _on_file_clicked(
             self, 
-            l_func
+            l_func,
+            data
             ):
-        self.file_list.file_clicked.connect(
-            lambda data: l_func(data)
-            )
+        l_func(data)
 
 
     def _init_ui(self):

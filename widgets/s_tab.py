@@ -18,6 +18,17 @@ class s_tab(QTabWidget):
             )   
 
 
+    def connect_tab_closed(
+            self, 
+            l_func
+            ):
+         self.tabCloseRequested.connect(
+             lambda idx : l_func(idx)
+             )
+
+
+    # Each insert/remove will refresh the components on main window.
+    # The upsert imple should be optimized in the future ...
     def upsert_widget_by_label(
             self, 
             widget, 
@@ -28,6 +39,7 @@ class s_tab(QTabWidget):
         if tab_idx >= 0:
             self.removeTab(tab_idx)
             self.insertTab(tab_idx, widget, label)
+            tab_idx = self._get_tab_index_by_label(label)
 
         else:
             self.addTab(widget, label)
@@ -35,26 +47,7 @@ class s_tab(QTabWidget):
 
 
         self.setCurrentIndex(tab_idx)
-
-
-    # def _on_tab_changed(
-    #         self, 
-    #         l_func
-    #         ):
-    #     self.currentChanged.connect(
-    #         lambda idx: l_func(idx)
-    #         )
-
-    #     # Get the tab widget that emitted the signal
-    #     sender = self.sender()
-    #     # Get the current tab index
-    #     current_tab_index = sender.currentIndex()
-
-    #     # Get the text of the current tab
-    #     current_tab_text = sender.tabText(current_tab_index)
-    #     print("Clicked Tab Index:", current_tab_index)
-    #     print("Clicked Tab Text:", current_tab_text)
-
+  
 
     def _get_tab_index_by_label(
             self, 

@@ -66,6 +66,9 @@ class s_main_window(QMainWindow):
             return
         
 
+        del self.c_config['ds_fpath_map']
+        self.c_config['ds_fpath_map'] = { }
+
         self.c_config['root_dir'] = root_dir        
 
         if self._prompt_project_config():
@@ -111,6 +114,9 @@ class s_main_window(QMainWindow):
             return
     
 
+        del self.c_config['ds_fpath_map']
+        self.c_config['ds_fpath_map'] = { }
+
         self.c_config['root_dir'] = root_dir
 
         self.c_config['active_ds_fpath'] = QFileDialog().getOpenFileName(
@@ -155,6 +161,14 @@ class s_main_window(QMainWindow):
             "JSON Files (*.json)",
             options=QFileDialog.Options() | QFileDialog.ReadOnly | QFileDialog.DontUseNativeDialog
             )
+
+        if ds_fpath == '':
+            return
+
+
+        if(self.tab.count() > 0):
+            self.tab.setTabsClosable(True)
+
 
         c_reader = config_reader(ds_fpath)
 
@@ -331,7 +345,6 @@ class s_main_window(QMainWindow):
         self.search_title = QLabel('Dangling Notes')
 
         self.search_bar = s_file_search_bar()
-
         self.file_list = s_file_list(model)
 
         self.file_searcher = s_file_searcher(self.search_title, self.search_bar, self.file_list)
@@ -348,6 +361,10 @@ class s_main_window(QMainWindow):
         self.tab.connect_tab_changed(
             lambda idx: self._on_tab_changed(idx)
             )
+        
+        self.tab.connect_tab_closed(
+            lambda idx: self._on_tab_closed(idx)
+        )
 
 
     def _init_left_panel(self):
@@ -377,6 +394,11 @@ class s_main_window(QMainWindow):
             self, 
             idx
             ):
+        # When there is zero tab
+        if idx == -1:
+            return
+
+
         sender = self.tab.sender()
 
         self.c_config['active_user'] = sender.tabText(idx)
@@ -385,6 +407,44 @@ class s_main_window(QMainWindow):
         c_reader = config_reader(self.c_config['active_ds_fpath'])
         
         self.c_helper = core_helper(c_reader)
+
+        self._update_file_tree()
+        self._update_file_searcher()
+            
+        self._update_core_manager()
+
+
+    def _on_tab_closed(
+            self,
+            idx
+            ):
+        print(idx)
+
+        sender = self.tab.sender()
+
+        active_idx = idx
+
+        # First tab
+        if idx == 0:
+            active_idx = idx + 1
+
+        else:
+            active_idx = idx - 1
+
+
+        self.text_editors_map[sender.tabText(idx)].deleteLater()
+        del self.text_editors_map[sender.tabText(idx)]
+
+        del self.c_config['ds_fpath_map'][sender.tabText(idx)]
+
+        self.c_config['active_user'] = sender.tabText(active_idx)
+        self.c_config['active_ds_fpath'] = self.c_config['ds_fpath_map'][self.c_config['active_user']]
+
+        c_reader = config_reader(self.c_config['active_ds_fpath'])
+        
+        self.c_helper = core_helper(c_reader)   
+
+        self.tab.setCurrentIndex(active_idx)
 
         self._update_file_tree()
         self._update_file_searcher()
@@ -452,7 +512,6 @@ class s_main_window(QMainWindow):
 
 
         self.file_list.update_model(model)
-
         self.file_searcher.update_file_list(self.file_list)
 
 

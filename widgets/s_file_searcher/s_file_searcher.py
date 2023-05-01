@@ -44,7 +44,10 @@ class s_file_searcher(QWidget):
         self._init_ui()
 
 
-    def update_file_list(self, file_list):
+    def update_file_list(
+            self, 
+            file_list
+            ):
         self.file_list = file_list
 
         self.selected_fpath = self.file_list.selected_fpath
@@ -88,6 +91,7 @@ class s_file_searcher(QWidget):
             l_func,
             data
             ):
+        self.selected_fpath = data['file_path']
         l_func(data)
 
 

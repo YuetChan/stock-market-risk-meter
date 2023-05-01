@@ -54,32 +54,45 @@ class core_manager:
             self.core_helper = core_helper
 
             self.file_tree.file_clicked.connect(
-                lambda data : self._on_file_tree_file_clicked(data['file_path'], data['is_dir'])
+                lambda data: self._on_file_tree_file_clicked(data['file_path'], data['is_dir'])
             )
     
             self.file_searcher.connect_file_clicked(
-                lambda data : self._on_file_searcher_file_clicked(data['file_path'])
+                lambda data: self._on_file_searcher_file_clicked(data['file_path'])
             )
 
             self.rich_text_editor.connect_text_changed(
-                lambda data : self._auto_save_note(data)
+                lambda data: self._auto_save_note(data)
             )
             
             self.file_tree.expand(self.file_tree.model().index(0, 0))
             self.file_tree.click_root_file()
 
 
-    def _on_file_tree_file_clicked(self, fpath, is_dir):
+    def _on_file_tree_file_clicked(
+            self, 
+            fpath, 
+            is_dir
+            ):
         self.file_searcher.clear_selection()
         self._open_note(fpath, is_dir)
 
 
-    def _on_file_searcher_file_clicked(self, fpath):
+    def _on_file_searcher_file_clicked(
+            self, 
+            fpath
+            ):
+        print('fpath', fpath)
+
         self.file_tree.clearSelection()
         self._open_note(fpath, False)
 
 
-    def _open_note(self, fpath, is_dir):
+    def _open_note(
+            self, 
+            fpath, 
+            is_dir
+            ):
         self.rich_text_editor.set_label(f"Directory :  {fpath}" if is_dir else f"File :  {fpath}")
 
         note = self.core_helper.select_note_by_filepath(fpath)
@@ -96,7 +109,10 @@ class core_manager:
         return
 
 
-    def _auto_save_note(self, data):        
+    def _auto_save_note(
+            self, 
+            data
+            ): 
         if self.file_tree.selectionModel().hasSelection():
             self._auto_highlight_file_tree_file()
             self._save_note(self.file_tree.selected_fpath)
@@ -135,7 +151,10 @@ class core_manager:
                 self.file_tree.click_root_file()
 
 
-    def _save_note(self, fpath):
+    def _save_note(
+            self, 
+            fpath
+            ):
         self.core_helper.add_note_by_filepath(
             self.rich_text_editor.to_html(), 
             self.rich_text_editor.to_plain_text(),

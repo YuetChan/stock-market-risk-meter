@@ -98,6 +98,8 @@ class s_main_window(QMainWindow):
             self._init_core_ui()
             self._init_core_manager()
 
+            self._get_action_by_label('Add Note').setEnabled(True)
+
         else:
             self._show_config_file_create_failed_msg()
                 
@@ -121,7 +123,7 @@ class s_main_window(QMainWindow):
 
         self.c_config['active_ds_fpath'] = QFileDialog().getOpenFileName(
             None, 
-            "Open a datasource file", 
+            "Open a datasource JSON file", 
             "", 
             "JSON Files (*.json);;All Files (*)", 
             options= QFileDialog.Options() | QFileDialog.DontUseNativeDialog
@@ -149,6 +151,8 @@ class s_main_window(QMainWindow):
             self._init_core_ui()
             self._init_core_manager()
 
+            self._get_action_by_label('Add Note').setEnabled(True)
+
         else:
             self._show_config_file_not_valid_msg()
 
@@ -156,7 +160,7 @@ class s_main_window(QMainWindow):
     def add_datasource_file(self):
         ds_fpath, _ = QFileDialog.getOpenFileName(
             None,
-            "Select a JSON file",
+            "Select a datasource JSON file",
             "",
             "JSON Files (*.json)",
             options=QFileDialog.Options() | QFileDialog.ReadOnly | QFileDialog.DontUseNativeDialog
@@ -255,17 +259,19 @@ class s_main_window(QMainWindow):
 
     def _init_add_datasource_file_action(self):
         action = QAction(
-            'Add Datasource', 
+            'Add Note', 
             self
             )
 
         action.triggered.connect(self.add_datasource_file)
         self.file_menu.addAction(action)
 
+        action.setEnabled(False)
+
 
     def _init_auto_save_action(self):
         action = QAction(
-            QIcon(f"{os.environ['code_meta_dir']}/resources/check-solid.svg'"), 
+            QIcon(f"{os.environ['code_meta_dir']}/resources/check-solid.svg"), 
             'Auto Save', 
             self
             )
@@ -353,6 +359,8 @@ class s_main_window(QMainWindow):
     def _init_tab(self):
         self.tab = s_tab()
 
+        self.tab.setTabsClosable(True)
+
         self.tab.addTab(
             self.text_editors_map[self.c_config['active_user']], 
             f"{self.c_config['active_user']}"
@@ -418,8 +426,6 @@ class s_main_window(QMainWindow):
             self,
             idx
             ):
-        print(idx)
-
         sender = self.tab.sender()
 
         active_idx = idx
@@ -436,6 +442,13 @@ class s_main_window(QMainWindow):
         del self.text_editors_map[sender.tabText(idx)]
 
         del self.c_config['ds_fpath_map'][sender.tabText(idx)]
+
+        if self.tab.count() == 1:
+            self._clean_up()
+            self._clear_project()
+
+            return
+
 
         self.c_config['active_user'] = sender.tabText(active_idx)
         self.c_config['active_ds_fpath'] = self.c_config['ds_fpath_map'][self.c_config['active_user']]
@@ -512,7 +525,7 @@ class s_main_window(QMainWindow):
 
 
         self.file_list.update_model(model)
-        self.file_searcher.update_file_list(self.file_list)
+        self.file_searcher.update_file_list(self.file_list)  
 
 
     def _show_config_file_existed_msg(self):
@@ -553,6 +566,13 @@ class s_main_window(QMainWindow):
             'The selected project doesnt match existing project.'
             )
 
+    def _clear_project(self):
+        del self.c_config['project_name']
+        del self.c_config['active_user']
+        del self.c_config['active_ds_fpath']
+
+        self._get_action_by_label('Add Note').setEnabled(False)
+
 
     def _clean_up(self):
         if self.central_splitter != None:
@@ -562,7 +582,16 @@ class s_main_window(QMainWindow):
             # and this removes reference manually
             self.central_splitter = None
 
-            
+
+    def _get_action_by_label(self, label):
+        for action in self.file_menu.actions():
+            if action.text() == label:
+                return action
+
+
+        return None
+
+
     def _populate_file_tree_model(
             self, 
             root_dir,
@@ -588,7 +617,6 @@ class s_main_window(QMainWindow):
             parent, 
             path,
             ):
-        
         for fname in os.listdir(path):
             fpath = os.path.join(path, fname)
 

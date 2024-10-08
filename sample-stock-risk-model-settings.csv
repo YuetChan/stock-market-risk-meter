@@ -1,0 +1,8 @@
+stock,sector,weight
+CAT,Manufacturing,0.25
+KO,Consumer Staples,0.25
+SPG,Commercial Real Estate,0.15
+AAL,Transportation,0.05
+LUV,Transportation,0.05
+DJT,Transportation,0.1
+CCL,Consumer Services,0.15
